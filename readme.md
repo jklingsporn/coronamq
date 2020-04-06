@@ -1,4 +1,4 @@
-The simplest way to implement a task queue with Java, Vertx and PostgreSQL. 
+>The simplest way to implement a task queue with Java, Vertx and PostgreSQL. 
 
 # Simple
 There are only three participants in CoronaMQ you have to reason about:
@@ -7,8 +7,10 @@ There can be multiple labels (e.g. PLACE_ORDER, CHECKOUT, etc) and thus workers.
 2. The **broker** listens to additions made to the task queue and *send*s these tasks over the EventBus. There should only
 be one broker per application.
 3. The **TaskQueueDao** is interacting with the queue in the database. You can deploy it together with the broker, but you don't have to.\
+
 There is also the **Publisher**: A publisher can add tasks to the queue by sending a message on the EventBus. The publisher is not
-required as you can also publish tasks directly to the EventBus.\n
+required as you can also publish tasks directly to the EventBus.\
+
 ![Corona MQ Overview](doc/img/CoronaMQOverview.png?raw=true "Corona MQ Overview")
 
 # Fast
