@@ -1,6 +1,6 @@
 The simplest way to implement a task queue with Java, Vertx and PostgreSQL. 
 
-#Simple
+# Simple
 There are only three participants in CoronaMQ you have to reason about:
 1. **Worker(s)** act on new tasks added to the queue. Workers are bound to a label which describes the unit of work.
 There can be multiple labels (e.g. PLACE_ORDER, CHECKOUT, etc) and thus workers.
@@ -8,7 +8,7 @@ There can be multiple labels (e.g. PLACE_ORDER, CHECKOUT, etc) and thus workers.
 be one broker per application.
 3. The **TaskQueueDao** is interacting with the queue in the database. You can deploy it together with the broker, but you don't have to.
 
-#Fast
+# Fast
 Thanks to PostgresSQL's [NOTIFY/LISTEN](https://www.postgresql.org/docs/current/sql-notify.html) and the [fastest PostgresSQL driver for Java](https://github.com/eclipse-vertx/vertx-sql-client) 
 out there, tasks are instantly pushed to the EventBus. There is no polling. To empty the task queue as soon as possible, workers are 
 activated in three situations:
@@ -16,16 +16,16 @@ activated in three situations:
 - when they are started they request a new task from the queue
 - when they've done completing a task they request a new task from the queue
 
-#Persistent
+# Persistent
 The tasks are stored in a PostgreSQL database guaranteeing durability and consistency. Your application might already use a PostgreSQL
 database in the persistence layer so you don't have to bring another player to your system architecture. The fewer players, the less errors.  
 
-#Once
+# Once
 Many queues out there guarantee `at least once`-delivery which means tasks might get handled twice. But what you really want 
 is `exactly once` delivery. You have one job and it should be done once. However, in a real world, there are network timeouts, 
 database errors et al so the best you can get is `effectively once` delivery and this is what CoronaMQ aims for.
 
-#Initial setup
+# Initial setup
 - For a quick test, you can build and use the provided docker file.
 - All others need to add the following SQL to their existing database:
 ```
@@ -49,7 +49,7 @@ CREATE TRIGGER task_status_change
 EXECUTE PROCEDURE task_status_notify();
 ``` 
 
-#Usage
+# Usage
 The participants have `start`- and `stop`-methods which have to be invoked after they've been created. It is important 
 to start and stop them in the right order or otherwise data might get lost.\
 **Start order**:
@@ -62,7 +62,7 @@ to start and stop them in the right order or otherwise data might get lost.\
 2. Worker
 3. TaskQueueDao
 
-##Code example
+## Code example
 ```
 @Test
 public void basicExample(Vertx vertx, VertxTestContext testContext){
