@@ -21,7 +21,7 @@
     </properties>
 
     <description>The simplest way to implement a task queue with Java, Vertx and PostgreSQL. </description>
-    <url>https://github.com/jklingsporn/vertx-jooq</url>
+    <url>https://github.com/badmonkee/coronamq</url>
     <developers>
         <developer>
             <name>Jens Klingpsorn</name>
@@ -31,8 +31,8 @@
     </developers>
     <licenses>
         <license>
-            <name>MIT License</name>
-            <url>https://raw.githubusercontent.com/jklingsporn/vertx-jooq/master/LICENSE</url>
+            <name>Apache License 2.0</name>
+            <url>https://raw.githubusercontent.com/badmonkee/coronamq/master/LICENSE</url>
         </license>
     </licenses>
 
