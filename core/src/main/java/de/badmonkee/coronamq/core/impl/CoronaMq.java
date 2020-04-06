@@ -21,7 +21,7 @@ import java.util.function.Function;
  *     <li><b>{@link TaskQueueDao}</b>: The TaskQueueDao is interacting with the queue in the database.</li>
  * </ul>
  * There is also the <b>{@link Publisher}</b>: A publisher can add tasks to the queue by sending a message on the EventBus. The publisher is not
- * a required as you can also publish tasks by using the static {@link CoronaMq#publishTask(Vertx, String, String, JsonObject)}</li> method.<br>
+ * required as you can also publish tasks by using the static {@link CoronaMq#publishTask(Vertx, String, String, JsonObject)}</li> method.<br>
  * Note that the required participants have <code>start</code>- and <code>stop</code>-methods which have to be invoked after they've been created. It is
  * important to start and stop them in the right order or otherwise data might get lost.<br>
  * Start order:
