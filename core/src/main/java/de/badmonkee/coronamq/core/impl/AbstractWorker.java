@@ -25,7 +25,7 @@ public abstract class AbstractWorker implements Worker {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractWorker.class);
 
-    private final Vertx vertx;
+    protected final Vertx vertx;
     private final CoronaMqOptions coronaMqOptions;
     private final String label;
     private final AtomicBoolean running = new AtomicBoolean(false);
