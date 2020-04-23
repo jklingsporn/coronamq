@@ -10,6 +10,7 @@
     <version>0.1</version>
     <modules>
         <module>core</module>
+        <module>examples</module>
     </modules>
 
     <properties>
@@ -91,9 +92,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.1</version>
                 <configuration>
-                    <release>8</release>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
         </plugins>

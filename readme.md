@@ -30,7 +30,9 @@ Many queues out there guarantee `at least once`-delivery which means tasks might
 is `exactly once` delivery. You have one job and it should be done once. However, in a real world, there are network timeouts, 
 database errors et al so the best you can get is `effectively once` delivery and this is what CoronaMQ aims for.
 
-# Initial setup
+# Usage
+
+## Initial setup
 - For a quick test, you can build and use the provided docker file.
 - All others need to add the following SQL to their existing database:
 ```
@@ -54,7 +56,7 @@ CREATE TRIGGER task_status_change
 EXECUTE PROCEDURE task_status_notify();
 ``` 
 
-# Usage
+## Start and stop order
 The participants have `start`- and `stop`-methods which have to be invoked after they've been created. It is important 
 to start and stop them in the right order or otherwise data might get lost.\
 **Start order**:
@@ -67,7 +69,10 @@ to start and stop them in the right order or otherwise data might get lost.\
 2. Worker
 3. TaskQueueDao
 
+
 ## Code example
+A complete example can be found in the [examples-module](/examples).
+
 ```
 @Test
 public void basicExample(Vertx vertx, VertxTestContext testContext){
