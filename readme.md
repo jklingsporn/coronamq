@@ -104,3 +104,8 @@ public void basicExample(Vertx vertx, VertxTestContext testContext){
     ;
 }
 ```
+
+# Community has spoken
+I originally created the project under the name PoXMQ (**Po**stgres Vert**X** **MQ**) but wasn't
+completely satisfied with it. So I made a poll on [twitter](https://twitter.com/klingspoon/status/1245657559484076034) - what could possibly go wrong?
+![Never feed the trolls](doc/img/NeverFeedTheTrolls.png?raw=true "never feed the trolls")
