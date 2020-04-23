@@ -140,6 +140,13 @@ class TaskQueueDaoImpl implements TaskQueueDao {
     }
 
     @Override
+    public Future<Long> countTasks(String label) {
+        Promise<RowSet<Row>> completion = Promise.promise();
+        pool.preparedQuery("SELECT COUNT(*) FROM tasks WHERE label = $1").execute( Tuple.of(label),completion);
+        return completion.future().map(res -> res.iterator().next().getLong(0));
+    }
+
+    @Override
     public Future<Integer> deleteTask(String id) {
         Promise<RowSet<Row>> completion = Promise.promise();
         pool.preparedQuery("DELETE FROM tasks WHERE id = $1").execute( Tuple.of(UUID.fromString(id)),completion);

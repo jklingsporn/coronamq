@@ -51,6 +51,12 @@ public interface TaskQueueDao {
     public Future<JsonObject> getTask(String id);
 
     /**
+     * @param label the label
+     * @return the amount of existing tasks.
+     */
+    public Future<Long> countTasks(String label);
+
+    /**
      * @param id the id.
      * @return a {@link Future} that is completed when the task has been deleted.
      */
