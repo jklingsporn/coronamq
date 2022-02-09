@@ -1,5 +1,6 @@
 package de.badmonkee.coronamq.core;
 
+import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 
@@ -8,6 +9,7 @@ import java.util.UUID;
 /**
  * Necessary actions to operate with the task queue.
  */
+@ProxyGen
 public interface TaskQueueDao {
 
     /**
