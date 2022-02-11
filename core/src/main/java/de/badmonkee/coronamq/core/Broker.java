@@ -1,11 +1,13 @@
 package de.badmonkee.coronamq.core;
 
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 
 /**
  * A wrapper around a {@link io.vertx.pgclient.pubsub.PgSubscriber} - instance that listens to changes in the tasks table via NOTIFY/LISTEN.
  * There should be only one broker per application.
  */
+@VertxGen
 public interface Broker {
 
     /**

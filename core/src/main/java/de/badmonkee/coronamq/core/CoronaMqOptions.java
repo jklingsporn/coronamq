@@ -6,30 +6,21 @@ public class CoronaMqOptions {
 
     private static final String defaultChannelName = "coronamq_task_update";
     private static final String defaultWorkerAddress = "coronamq.task.run.";
-    private static final String defaultTaskFailureAddress = "coronamq.task.fail";
-    private static final String defaultTaskPublishAddress = "coronamq.task.publish";
-    private static final String defaultTaskUpdateAddress = "coronamq.task.update";
-    private static final String defaultTaskRequestAddress = "coronamq.task.request";
+    private static final String defaultDaoAddress = "coronamq.dao";
 
     private String channelName;
     private String workerAddress;
-    private String taskPublishAddress;
-    private String taskUpdateAddress;
-    private String taskRequestAddress;
-    private String taskFailureAddress;
+    private String daoAddress;
     private PgConnectOptions connectOptions;
 
     public CoronaMqOptions() {
         this(
                 defaultChannelName,
                 defaultWorkerAddress,
-                defaultTaskPublishAddress,
-                defaultTaskUpdateAddress,
-                defaultTaskRequestAddress,
-                defaultTaskFailureAddress,
+                defaultDaoAddress,
                 new PgConnectOptions()
                     .setPort(5432)
-                    .setHost("127.0.0.1")
+                    .setHost("localhost")
                     .setDatabase("postgres")
                     .setUser("coronamq")
                     .setPassword("vertx"));
@@ -37,17 +28,11 @@ public class CoronaMqOptions {
 
     public CoronaMqOptions(String channelName,
                            String workerAddress,
-                           String taskPublishAddress,
-                           String taskUpdateAddress,
-                           String taskRequestAddress,
-                           String taskFailureAddress,
+                           String daoAddress,
                            PgConnectOptions connectOptions) {
         this.channelName = channelName;
         this.workerAddress = workerAddress;
-        this.taskPublishAddress = taskPublishAddress;
-        this.taskUpdateAddress = taskUpdateAddress;
-        this.taskRequestAddress = taskRequestAddress;
-        this.taskFailureAddress = taskFailureAddress;
+        this.daoAddress = daoAddress;
         this.connectOptions = connectOptions;
     }
 
@@ -78,39 +63,12 @@ public class CoronaMqOptions {
         return this;
     }
 
-    public String getTaskPublishAddress() {
-        return taskPublishAddress;
+    public String getDaoAddress() {
+        return daoAddress;
     }
 
-    public CoronaMqOptions setTaskPublishAddress(String taskPublishAddress) {
-        this.taskPublishAddress = taskPublishAddress;
-        return this;
-    }
-
-    public String getTaskUpdateAddress() {
-        return taskUpdateAddress;
-    }
-
-    public CoronaMqOptions setTaskUpdateAddress(String taskUpdateAddress) {
-        this.taskUpdateAddress = taskUpdateAddress;
-        return this;
-    }
-
-    public String getTaskRequestAddress() {
-        return taskRequestAddress;
-    }
-
-    public CoronaMqOptions setTaskRequestAddress(String taskRequestAddress) {
-        this.taskRequestAddress = taskRequestAddress;
-        return this;
-    }
-
-    public String getTaskFailureAddress() {
-        return taskFailureAddress;
-    }
-
-    public CoronaMqOptions setTaskFailureAddress(String taskFailureAddress) {
-        this.taskFailureAddress = taskFailureAddress;
+    public CoronaMqOptions setDaoAddress(String daoAddress) {
+        this.daoAddress = daoAddress;
         return this;
     }
 }

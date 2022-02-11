@@ -1,9 +1,8 @@
 package de.badmonkee.coronamq.core.impl;
 
+import de.badmonkee.coronamq.core.CoronaMqOptions;
 import de.badmonkee.coronamq.core.TaskQueueDao;
 import de.badmonkee.coronamq.core.TaskStatus;
-import de.badmonkee.coronamq.core.CoronaMqOptions;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -11,6 +10,8 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.impl.Arguments;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
+import io.vertx.serviceproxy.ServiceBinder;
+import io.vertx.serviceproxy.ServiceException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlResult;
@@ -18,30 +19,27 @@ import io.vertx.sqlclient.Tuple;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author jensklingsporn
  */
 class TaskQueueDaoImpl implements TaskQueueDao {
 
-    private final Vertx vertx;
     private final CoronaMqOptions coronaMqOptions;
     private final PgPool pool;
-    private Collection<MessageConsumer<JsonObject>> messageConsumers;
+    private final ServiceBinder binder;
+    private MessageConsumer<JsonObject> messageConsumer;
 
 
     public TaskQueueDaoImpl(Vertx vertx, CoronaMqOptions coronaMqOptions, PgPool pool){
-        this.vertx = vertx;
         this.coronaMqOptions = coronaMqOptions;
         this.pool = pool;
+        this.binder = new ServiceBinder(vertx);
     }
 
     @Override
-    public Future<UUID> createTask(String label, JsonObject payload) {
+    public Future<String> createTask(String label, JsonObject payload) {
         Promise<RowSet<Row>> completion = Promise.promise();
 
         UUID newId = UUID.randomUUID();
@@ -53,7 +51,7 @@ class TaskQueueDaoImpl implements TaskQueueDao {
                         TaskStatus.NEW.toString(),
                         LocalDateTime.now(Clock.systemUTC())
                 ), completion);
-        return completion.future().map(newId);
+        return completion.future().map(newId.toString()).recover(x -> failWithCode(Internal.CODE_ERROR_PUBLISH,x));
     }
 
     @Override
@@ -67,7 +65,8 @@ class TaskQueueDaoImpl implements TaskQueueDao {
         return completion
                 .future()
                 .onSuccess(rowSet -> Arguments.require(rowSet.rowCount() == 1,"Not updated"))
-                .mapEmpty();
+                .<Void>mapEmpty()
+                .recover(x -> failWithCode(Internal.CODE_ERROR_PUBLISH,x));
     }
 
     @Override
@@ -86,7 +85,8 @@ class TaskQueueDaoImpl implements TaskQueueDao {
         return completion
                 .future()
                 .onSuccess(rowSet -> Arguments.require(rowSet.rowCount() == 1,"Not updated"))
-                .mapEmpty();
+                .<Void>mapEmpty()
+                .recover(x -> failWithCode(Internal.CODE_ERROR_UPDATE,x));
     }
 
     @Override
@@ -116,7 +116,7 @@ class TaskQueueDaoImpl implements TaskQueueDao {
                     .put("payload", newJob.get(JsonObject.class,2))
                     .put("status",newJob.getString(3))
                     ;
-        });
+        }).recover(x -> failWithCode(Internal.CODE_ERROR_REQUEST,x));
     }
 
     @Override
@@ -155,63 +155,58 @@ class TaskQueueDaoImpl implements TaskQueueDao {
 
     @Override
     public Future<Void> start() {
-        MessageConsumer<JsonObject> publishConsumer = vertx.eventBus().<JsonObject>consumer(coronaMqOptions.getTaskPublishAddress(), msg ->
-                createTask(msg.body().getString("label"), msg.body().getJsonObject("payload"))
-                        .onSuccess(uuid -> msg.reply(new JsonObject().put("id", uuid.toString())))
-                        .onFailure(err -> msg.fail(Internal.CODE_ERROR_PUBLISH, err.getMessage()))
-        );
-        MessageConsumer<JsonObject> updateConsumer = vertx.eventBus().<JsonObject>consumer(coronaMqOptions.getTaskUpdateAddress(), msg ->
-                updateTask(
-                        (msg.body().getString("id")),
-                        TaskStatus.valueOf(msg.body().getString("newStatus")),
-                        TaskStatus.valueOf(msg.body().getString("oldStatus"))
-                )
-                        .onSuccess(msg::reply)
-                        .onFailure(err -> msg.fail(Internal.CODE_ERROR_UPDATE, err.getMessage()))
-        );
-        MessageConsumer<JsonObject> requestConsumer = vertx.eventBus().<JsonObject>consumer(coronaMqOptions.getTaskRequestAddress(), msg ->
-                requestTask(msg.body().getString("label"))
-                        .onSuccess(msg::reply)
-                        .onFailure(err -> msg.fail(Internal.CODE_ERROR_REQUEST, err.getMessage()))
-        );
-        MessageConsumer<JsonObject> failConsumer = vertx.eventBus().<JsonObject>consumer(coronaMqOptions.getTaskFailureAddress(), msg ->
-                failTask(
-                        (msg.body().getString("id")),
-                        msg.body().getString("cause")
-                )
-                        .onSuccess(msg::reply)
-                        .onFailure(err -> msg.fail(Internal.CODE_ERROR_FAIL, err.getMessage()))
-        );
-        this.messageConsumers = Arrays.asList(
-                publishConsumer,
-                updateConsumer,
-                requestConsumer,
-                failConsumer
-        );
-        return CompositeFuture.all(this.messageConsumers
-                .stream()
-                .map(c -> {
-                    Promise<Void> promise = Promise.promise();
-                    c.completionHandler(promise);
-                    return promise.future();
-                })
-                .collect(Collectors.toList()))
-                .mapEmpty();
+//        MessageConsumer<JsonObject> publishConsumer = vertx.eventBus().<JsonObject>consumer(coronaMqOptions.getTaskPublishAddress(), msg ->
+//                createTask(msg.body().getString("label"), msg.body().getJsonObject("payload"))
+//                        .onSuccess(uuid -> msg.reply(new JsonObject().put("id", uuid.toString())))
+//                        .onFailure(err -> msg.fail(Internal.CODE_ERROR_PUBLISH, err.getMessage()))
+//        );
+//        MessageConsumer<JsonObject> updateConsumer = vertx.eventBus().<JsonObject>consumer(coronaMqOptions.getTaskUpdateAddress(), msg ->
+//                updateTask(
+//                        (msg.body().getString("id")),
+//                        TaskStatus.valueOf(msg.body().getString("newStatus")),
+//                        TaskStatus.valueOf(msg.body().getString("oldStatus"))
+//                )
+//                        .onSuccess(msg::reply)
+//                        .onFailure(err -> msg.fail(Internal.CODE_ERROR_UPDATE, err.getMessage()))
+//        );
+//        MessageConsumer<JsonObject> requestConsumer = vertx.eventBus().<JsonObject>consumer(coronaMqOptions.getTaskRequestAddress(), msg ->
+//                requestTask(msg.body().getString("label"))
+//                        .onSuccess(msg::reply)
+//                        .onFailure(err -> msg.fail(Internal.CODE_ERROR_REQUEST, err.getMessage()))
+//        );
+//        MessageConsumer<JsonObject> failConsumer = vertx.eventBus().<JsonObject>consumer(coronaMqOptions.getTaskFailureAddress(), msg ->
+//                failTask(
+//                        (msg.body().getString("id")),
+//                        msg.body().getString("cause")
+//                )
+//                        .onSuccess(msg::reply)
+//                        .onFailure(err -> msg.fail(Internal.CODE_ERROR_FAIL, err.getMessage()))
+//        );
+//        this.messageConsumers = Arrays.asList(
+//                publishConsumer,
+//                updateConsumer,
+//                requestConsumer,
+//                failConsumer
+//        );
+        this.messageConsumer = binder.setAddress(coronaMqOptions.getDaoAddress()).register(TaskQueueDao.class, this);
+        Promise<Void> registrationPromise = Promise.promise();
+        this.messageConsumer.completionHandler(registrationPromise);
+        return registrationPromise.future();
     }
 
     @Override
     public Future<Void> stop() {
-        if(this.messageConsumers == null){
+        if(this.messageConsumer == null){
             return Future.succeededFuture();
         }
-        return CompositeFuture.all(this.messageConsumers
-                .stream()
-                .map(c -> {
-                    Promise<Void> promise = Promise.promise();
-                    c.unregister(promise);
-                    return promise.future();
-                })
-                .collect(Collectors.toList()))
-                .mapEmpty();
+        Promise<Void> unregisterPromise = Promise.promise();
+        //manually unregister messageConsumer because binder.unregister returns void...
+        messageConsumer.unregister(unregisterPromise);
+        binder.unregister(messageConsumer);
+        return unregisterPromise.future();
+    }
+
+    private <T> Future<T> failWithCode(int code,Throwable x) {
+        return Future.failedFuture(new ServiceException(code, x.getMessage()));
     }
 }

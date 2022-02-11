@@ -17,37 +17,7 @@
             <artifactId>vertx-service-proxy</artifactId>
             <version>${vertx.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-codegen</artifactId>
-            <version>${vertx.version}</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.bsc.maven</groupId>
-                <artifactId>maven-processor-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>generate-sources</id>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <processors>
-                                <processor>io.vertx.codegen.CodeGenProcessor</processor>
-                            </processors>
-                            <outputDirectory>src/main/generated</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

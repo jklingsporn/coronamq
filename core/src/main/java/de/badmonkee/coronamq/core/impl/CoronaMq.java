@@ -1,9 +1,12 @@
 package de.badmonkee.coronamq.core.impl;
 
 import de.badmonkee.coronamq.core.*;
+import de.badmonkee.coronamq.core.bootstrap.BootstrapInitStep;
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
@@ -37,9 +40,18 @@ import java.util.function.Function;
  *     <li>3. {@link TaskQueueDao}</li>
  * </ul>
  */
+@VertxGen
 public class CoronaMq {
 
     private CoronaMq(){}
+
+    public static BootstrapInitStep create(Vertx vertx){
+        return create(vertx, new CoronaMqOptions());
+    }
+
+    public static BootstrapInitStep create(Vertx vertx, CoronaMqOptions coronaMqOptions){
+        return new BootstrapImpl(vertx, coronaMqOptions);
+    }
 
     /**
      * @param vertx the vertx instance
@@ -95,9 +107,9 @@ public class CoronaMq {
      * @see #publisher(Vertx, CoronaMqOptions)
      */
     public static Future<UUID> publishTask(Vertx vertx, String publishAddress, String label, JsonObject payload){
-        Promise<Message<JsonObject>> promise = Promise.promise();
-        vertx.eventBus().request(publishAddress, new JsonObject().put("label",label).put("payload",payload),promise);
-        return promise.future().map(msg -> UUID.fromString(msg.body().getString("id")));
+        Promise<Message<String>> promise = Promise.promise();
+        vertx.eventBus().request(publishAddress, new JsonObject().put("label",label).put("payload",payload),new DeliveryOptions().addHeader("action","createTask"), promise);
+        return promise.future().map(msg -> UUID.fromString(msg.body()));
     }
 
     /**
@@ -144,6 +156,16 @@ public class CoronaMq {
      */
     public static TaskQueueDao dao(Vertx vertx, PgPool pgPool){
         return dao(vertx, new CoronaMqOptions(), pgPool);
+    }
+
+    /**
+     * @param vertx the vertx instance
+     * @param coronaMqOptions the options
+     * @return a new {@link TaskQueueDao}. The TaskQueueDao performs the
+     * necessary actions to operate with the task queue.
+     */
+    public static TaskQueueDao dao(Vertx vertx, CoronaMqOptions coronaMqOptions){
+        return new TaskQueueDaoImpl(vertx, coronaMqOptions, PgPool.pool(vertx, coronaMqOptions.getConnectOptions(), new PoolOptions()));
     }
 
     /**

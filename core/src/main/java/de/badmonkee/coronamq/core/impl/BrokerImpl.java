@@ -34,7 +34,6 @@ class BrokerImpl implements Broker {
                     .handler(payload -> {
                         JsonObject task = new JsonObject(payload);
                         vertx.eventBus().send(Internal.toWorkerAddress(coronaMqOptions,task.getString("label")), task);
-
                     });
         });
         return started;

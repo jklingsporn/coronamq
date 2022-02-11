@@ -1,5 +1,6 @@
 package de.badmonkee.coronamq.core;
 
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 
@@ -7,6 +8,7 @@ import io.vertx.core.json.JsonObject;
  * A worker to work on tasks from the task queue. A worker is bound to a 'label' which describes the unit of work of this
  * worker.
  */
+@VertxGen
 public interface Worker {
 
     /**

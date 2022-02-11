@@ -1,10 +1,7 @@
 package de.badmonkee.coronamq.core;
 
-import de.badmonkee.coronamq.core.impl.AbstractWorker;
 import de.badmonkee.coronamq.core.impl.CoronaMq;
 import io.vertx.core.CompositeFuture;
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
@@ -12,21 +9,26 @@ import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * @author jensklingsporn
  */
 @ExtendWith(VertxExtension.class)
+@Testcontainers
 public class SimpleExampleTest {
+
+    @Container
+    static PostgresTestContainer database = new PostgresTestContainer();
 
     @Test
     public void basicExample(Vertx vertx, VertxTestContext testContext){
-
         //the broker sends a new task onto the eventbus when it is added
-        Broker broker = CoronaMq.broker(vertx);
+        Broker broker = CoronaMq.broker(vertx,database.getCoronaMqOptions());
 
         //CRUD for tasks, can be deployed as verticle
-        TaskQueueDao taskQueueDao = CoronaMq.dao(vertx);
+        TaskQueueDao taskQueueDao = CoronaMq.dao(vertx,database.getCoronaMqOptions());
 
         //Some work to do
         SimpleWorker simpleWorker = new SimpleWorker(vertx, new CoronaMqOptions());
@@ -53,10 +55,10 @@ public class SimpleExampleTest {
     public void failureExample(Vertx vertx, VertxTestContext testContext){
 
         //the broker sends a new task onto the eventbus when it is added
-        Broker broker = CoronaMq.broker(vertx);
+        Broker broker = CoronaMq.broker(vertx, database.getCoronaMqOptions());
 
         //CRUD for tasks, can be deployed as verticle
-        TaskQueueDao taskQueueDao = CoronaMq.dao(vertx);
+        TaskQueueDao taskQueueDao = CoronaMq.dao(vertx, database.getCoronaMqOptions());
 
         //Some work to fail
         FailedWorker failedWorker = new FailedWorker(vertx, new CoronaMqOptions());
@@ -86,50 +88,6 @@ public class SimpleExampleTest {
                 )
                 .onFailure(testContext::failNow)
         ;
-    }
-
-    class SimpleWorker extends AbstractWorker {
-
-        Promise<Void> completion = Promise.promise();
-
-        public SimpleWorker(Vertx vertx,
-                            CoronaMqOptions coronaMqOptions) {
-            super(vertx, coronaMqOptions,"test");
-        }
-
-        @Override
-        public Future<Void> run(JsonObject task) {
-            completion.complete();
-            return completion.future();
-        }
-
-        @Override
-        protected Future<Void> getCurrentWork() {
-            //we need to make sure that super.getCurrentWork is not just returning the default succeeded future
-            return completion.future().compose(v->super.getCurrentWork());
-        }
-    }
-
-    class FailedWorker extends AbstractWorker {
-
-        Promise<Void> completion = Promise.promise();
-
-        public FailedWorker(Vertx vertx,
-                            CoronaMqOptions coronaMqOptions) {
-            super(vertx, coronaMqOptions,"test");
-        }
-
-        @Override
-        public Future<Void> run(JsonObject task) {
-            completion.fail("Work has failed");
-            return completion.future();
-        }
-
-        @Override
-        protected Future<Void> getCurrentWork() {
-            //we need to make sure that super.getCurrentWork is not just returning the default succeeded future
-            return completion.future().recover(v->super.getCurrentWork());
-        }
     }
 
 }

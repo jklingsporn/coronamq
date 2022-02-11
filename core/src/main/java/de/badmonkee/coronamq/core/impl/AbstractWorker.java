@@ -1,12 +1,12 @@
 package de.badmonkee.coronamq.core.impl;
 
 import de.badmonkee.coronamq.core.CoronaMqOptions;
+import de.badmonkee.coronamq.core.TaskQueueDao;
 import de.badmonkee.coronamq.core.TaskStatus;
 import de.badmonkee.coronamq.core.Worker;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -29,6 +29,7 @@ public abstract class AbstractWorker implements Worker {
     private final CoronaMqOptions coronaMqOptions;
     private final String label;
     private final AtomicBoolean running = new AtomicBoolean(false);
+    private final TaskQueueDao dao;
 
     private MessageConsumer<JsonObject> messageConsumer;
     private Future<Void> currentWork = Future.succeededFuture();
@@ -39,6 +40,7 @@ public abstract class AbstractWorker implements Worker {
         this.vertx = vertx;
         this.coronaMqOptions = coronaMqOptions;
         this.label = label;
+        this.dao = TaskQueueDao.createProxy(vertx,coronaMqOptions.getDaoAddress());
     }
 
     @Override
@@ -46,7 +48,7 @@ public abstract class AbstractWorker implements Worker {
         messageConsumer = vertx.eventBus().<JsonObject>consumer(Internal.toWorkerAddress(coronaMqOptions,label), message -> {
                     try {
                         if (!running.getAndSet(true)) {
-                            currentWork = handleWork(message,true)
+                            currentWork = handleWork(message.body(),true)
                                     //if failed or not, we need to reset the running state
                                     .onComplete(res -> running.set(false))
                                     //log any exception
@@ -78,62 +80,40 @@ public abstract class AbstractWorker implements Worker {
         return unregistered.future().compose(v -> currentWork);
     }
 
-    private Future<Void> handleWork(Message<JsonObject> message, boolean setRunning) {
+    private Future<Void> handleWork(JsonObject message, boolean setRunning) {
             UUID taskId = getId(message);
             JsonObject payload = getPayload(message);
             return (setRunning
-                    ? updateTask(taskId, TaskStatus.RUNNING, TaskStatus.NEW)
-                    : Future.<Message<Void>>succeededFuture())
+                    ? dao.updateTask(taskId.toString(), TaskStatus.RUNNING, TaskStatus.NEW)
+                    : Future.<Void>succeededFuture())
                     .compose(v->run(payload))
-                    .compose(updatedPayload -> updateTask(taskId,TaskStatus.COMPLETED,TaskStatus.RUNNING))
+                    .compose(updatedPayload -> dao.updateTask(taskId.toString(),TaskStatus.COMPLETED,TaskStatus.RUNNING))
                     .compose(v-> requestNewTask())
                     .recover(failTask(taskId));
-    }
-
-    private Future<Message<Void>> updateTask(UUID taskId, TaskStatus newStatus, TaskStatus oldStatus) {
-        Promise<Message<Void>> updated = Promise.promise();
-        vertx.eventBus().request(coronaMqOptions.getTaskUpdateAddress(), new JsonObject()
-                .put("id",taskId.toString())
-                .put("newStatus", newStatus)
-                .put("oldStatus",oldStatus),
-                updated
-        );
-        return updated.future();
     }
 
     private Function<Throwable, Future<Void>> failTask(UUID taskId) {
         return ex -> {
             logger.error("Failed running task "+ex, ex);
-            Promise<Message<Void>> updated = Promise.promise();
-            vertx.eventBus().request(coronaMqOptions.getTaskFailureAddress(), new JsonObject()
-                            .put("id",taskId.toString())
-                            .put("cause", ex.getMessage()),
-                    updated
-            );
-            return updated.future().mapEmpty();
+            return dao.failTask(taskId.toString(), ex.getMessage()).mapEmpty();
         };
     }
 
     private Future<Void> requestNewTask() {
-        Promise<Message<JsonObject>> newTaskRequest = Promise.promise();
-        vertx.eventBus().request(coronaMqOptions.getTaskRequestAddress(), new JsonObject()
-                        .put("label",label),
-                newTaskRequest
-        );
-        return newTaskRequest.future().compose(newTask -> {
-            if(newTask.body() == null){
+        return dao.requestTask(label).compose(newTask -> {
+            if(newTask == null){
                 return Future.succeededFuture();
             }
             return handleWork(newTask,false);
         });
     }
 
-    private JsonObject getPayload(Message<JsonObject> message) {
-        return message.body().getJsonObject("payload", new JsonObject());
+    private JsonObject getPayload(JsonObject message) {
+        return message.getJsonObject("payload", new JsonObject());
     }
 
-    private UUID getId(Message<JsonObject> message){
-        return UUID.fromString(message.body().getString("id"));
+    private UUID getId(JsonObject message){
+        return UUID.fromString(message.getString("id"));
     }
 
     protected Future<Void> getCurrentWork() {

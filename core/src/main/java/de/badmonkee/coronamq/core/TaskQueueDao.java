@@ -1,16 +1,22 @@
 package de.badmonkee.coronamq.core;
 
 import io.vertx.codegen.annotations.ProxyGen;
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-
-import java.util.UUID;
 
 /**
  * Necessary actions to operate with the task queue.
  */
 @ProxyGen
+@VertxGen
 public interface TaskQueueDao {
+
+
+    public static TaskQueueDao createProxy(Vertx vertx, String address){
+        return new TaskQueueDaoVertxEBProxy(vertx,address);
+    }
 
     /**
      * Create a new task in the queue after a task has been published.
@@ -19,7 +25,7 @@ public interface TaskQueueDao {
      * @return  {@link Future} that is completed when the task is added to the queue containing the id associated
      * with the task.
      */
-    public Future<UUID> createTask(String label, JsonObject payload);
+    public Future<String> createTask(String label, JsonObject payload);
 
 
     /**

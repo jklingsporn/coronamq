@@ -23,6 +23,6 @@ class PublisherImpl implements Publisher {
 
     @Override
     public Future<UUID> publishTask(String label, JsonObject payload) {
-        return CoronaMq.publishTask(vertx, coronaMqOptions.getTaskPublishAddress(),label,payload);
+        return CoronaMq.publishTask(vertx, coronaMqOptions.getDaoAddress(),label,payload);
     }
 }
