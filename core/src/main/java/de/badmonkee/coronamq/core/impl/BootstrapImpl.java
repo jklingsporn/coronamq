@@ -4,7 +4,7 @@ import de.badmonkee.coronamq.core.Broker;
 import de.badmonkee.coronamq.core.CoronaMqOptions;
 import de.badmonkee.coronamq.core.TaskQueueDao;
 import de.badmonkee.coronamq.core.Worker;
-import de.badmonkee.coronamq.core.bootstrap.BootstrapInitStep;
+import de.badmonkee.coronamq.core.bootstrap.Bootstrap;
 import de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -13,12 +13,11 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-class BootstrapImpl implements BootstrapInitStep, BootstrapSpreadStep {
+class BootstrapImpl implements Bootstrap, BootstrapSpreadStep {
 
     private final Vertx vertx;
     private final CoronaMqOptions options;
@@ -39,7 +38,7 @@ class BootstrapImpl implements BootstrapInitStep, BootstrapSpreadStep {
 
 
     @Override
-    public BootstrapInitStep withWorker(Worker worker) {
+    public Bootstrap withWorker(Worker worker) {
         if(spread.get()){
             throw new IllegalStateException("Already spread");
         }
@@ -99,8 +98,8 @@ class BootstrapImpl implements BootstrapInitStep, BootstrapSpreadStep {
     }
 
     @Override
-    public Future<UUID> publishTask(String label, JsonObject payload) {
-        return CoronaMq.publishTask(vertx,options.getDaoAddress(),label,payload);
+    public Future<String> dispatch(String label, JsonObject payload) {
+        return CoronaMq.dispatch(vertx,options.getDaoAddress(),label,payload);
     }
 
     @Override

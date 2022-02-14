@@ -1,11 +1,11 @@
 package de.badmonkee.coronamq.core.bootstrap;
 
 import de.badmonkee.coronamq.core.Worker;
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 
-import java.util.UUID;
-
+@VertxGen
 public interface BootstrapSpreadStep {
 
     /**
@@ -23,12 +23,12 @@ public interface BootstrapSpreadStep {
     public Future<BootstrapSpreadStep> removeWorker(Worker worker);
 
     /**
-     * Publishes a task given this bootstrap's configuration
+     * Dispatches a task given this bootstrap's configuration
      * @param label the task's label
      * @param payload the task's payload
      * @return the id of the task.
      */
-    public Future<UUID> publishTask(String label, JsonObject payload);
+    public Future<String> dispatch(String label, JsonObject payload);
 
     /**
      * Stops all services in the right order.

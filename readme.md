@@ -8,8 +8,8 @@ There can be multiple labels (e.g. PLACE_ORDER, CHECKOUT, etc) and thus workers.
 be one broker per application.
 3. The **TaskQueueDao** is interacting with the queue in the database. You can deploy it together with the broker, but you don't have to.\
 
-There is also the **Publisher**: A publisher can add tasks to the queue by sending a message on the EventBus. The publisher is not
-required as you can also publish tasks directly to the EventBus.\
+There is also the **Dispatcher**: A dispatcher can add tasks to the queue by sending a message on the EventBus. The dispatcher is not
+required as you can also dispatch tasks directly to the EventBus.\
 
 ![Corona MQ Overview](doc/img/CoronaMQOverview.png?raw=true "Corona MQ Overview")
 
@@ -87,7 +87,7 @@ public void basicExample(Vertx vertx, VertxTestContext testContext){
     SimpleWorker simpleWorker = new SimpleWorker(vertx, new CoronaMqOptions());
 
     //Add some tasks to the queue
-    Publisher publisher = CoronaMq.publisher(vertx);
+    Dispatcher dispatcher = CoronaMq.dispatcher(vertx);
 
     testContext
             //start participants in the right order
@@ -96,7 +96,7 @@ public void basicExample(Vertx vertx, VertxTestContext testContext){
                     .compose(v->simpleWorker.start()) //... 
             )
             //send a new task to the queue
-            .compose(v-> publisher.publishTask("test",new JsonObject().put("someValue","hi")))
+            .compose(v-> dispatcher.dispatchTask("test",new JsonObject().put("someValue","hi")))
             //complete the work
             .compose(v-> simpleWorker.getCurrentWork())
             .onSuccess(res -> testContext.completeNow())

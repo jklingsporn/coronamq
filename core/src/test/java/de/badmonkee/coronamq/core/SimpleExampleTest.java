@@ -31,10 +31,10 @@ public class SimpleExampleTest {
         TaskQueueDao taskQueueDao = CoronaMq.dao(vertx,database.getCoronaMqOptions());
 
         //Some work to do
-        SimpleWorker simpleWorker = new SimpleWorker(vertx, new CoronaMqOptions());
+        SimpleWorker simpleWorker = new SimpleWorker(vertx, database.getCoronaMqOptions());
 
         //Required to add some tasks to the queue
-        Publisher publisher = CoronaMq.publisher(vertx);
+        Dispatcher dispatcher = CoronaMq.dispatcher(vertx);
 
         testContext
                 //start participants in the right order
@@ -43,7 +43,7 @@ public class SimpleExampleTest {
                         .compose(v->simpleWorker.start())
                 )
                 //send a new task to the queue
-                .compose(v-> publisher.publishTask("test",new JsonObject().put("someValue","hi")))
+                .compose(v-> dispatcher.dispatch("test",new JsonObject().put("someValue","hi")))
                 //complete the work
                 .compose(v-> simpleWorker.getCurrentWork())
                 .onSuccess(res -> testContext.completeNow())
@@ -61,10 +61,10 @@ public class SimpleExampleTest {
         TaskQueueDao taskQueueDao = CoronaMq.dao(vertx, database.getCoronaMqOptions());
 
         //Some work to fail
-        FailedWorker failedWorker = new FailedWorker(vertx, new CoronaMqOptions());
+        FailedWorker failedWorker = new FailedWorker(vertx, database.getCoronaMqOptions());
 
         //Required to add some tasks to the queue
-        Publisher publisher = CoronaMq.publisher(vertx);
+        Dispatcher dispatcher = CoronaMq.dispatcher(vertx);
 
         testContext
                 .assertComplete(CompositeFuture.all(
@@ -73,8 +73,8 @@ public class SimpleExampleTest {
                         .compose(v->failedWorker.start())
                 )
                 //send a new task to the queue
-                .compose(v-> publisher
-                        .publishTask("test",new JsonObject().put("will it fail",true))
+                .compose(v-> dispatcher
+                        .dispatch("test",new JsonObject().put("will it fail",true))
                         .compose(id -> failedWorker.getCurrentWork()
                                 .compose(ex -> taskQueueDao.getTask(id.toString()))
                                 .onSuccess(json -> testContext.verify(()->Assertions.assertEquals("Work has failed",json

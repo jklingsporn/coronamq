@@ -2,9 +2,16 @@ package de.badmonkee.coronamq.core.bootstrap;
 
 import de.badmonkee.coronamq.core.Worker;
 import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 
-public interface BootstrapInitStep {
+/**
+ * It is advisable to start the Broker, Workers and DAOs in the correct order. For easy setups which include at least
+ * the Broker and the DAO, this class can be used. Workers can be added before or after the queue has been "spread"
+ * (started).
+ */
+@VertxGen
+public interface Bootstrap {
 
     /**
      * Adds a Worker to this bootstrap.
@@ -12,7 +19,7 @@ public interface BootstrapInitStep {
      * @return
      */
     @Fluent
-    public BootstrapInitStep withWorker(Worker worker);
+    public Bootstrap withWorker(Worker worker);
 
     /**
      * Registers and starts all services in the right order.

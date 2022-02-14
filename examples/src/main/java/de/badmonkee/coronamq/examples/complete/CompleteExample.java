@@ -1,6 +1,6 @@
 package de.badmonkee.coronamq.examples.complete;
 
-import de.badmonkee.coronamq.core.Publisher;
+import de.badmonkee.coronamq.core.Dispatcher;
 import de.badmonkee.coronamq.core.impl.CoronaMq;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.JdkLoggerFactory;
@@ -55,7 +55,7 @@ public class CompleteExample {
                         return workerDeployment.future();
                     })
                     //everything is in place, now create some tasks
-                    .compose(deploymentId -> publishTasks(vertx,delaySupplier))
+                    .compose(deploymentId -> dispatchTasks(vertx,delaySupplier))
                     .onFailure(ex -> logger.error(ex.getMessage(),ex))
             ;
 
@@ -65,11 +65,11 @@ public class CompleteExample {
 
     }
 
-    private static Future<Void> publishTasks(Vertx vertx, Supplier<Long> delaySupplier) {
-        Publisher publisher = CoronaMq.publisher(vertx);
+    private static Future<Void> dispatchTasks(Vertx vertx, Supplier<Long> delaySupplier) {
+        Dispatcher dispatcher = CoronaMq.dispatcher(vertx);
         return CompositeFuture.all(LongStream
                 .range(0,1000)
-                .mapToObj(d -> publisher.publishTask("delayed",new JsonObject().put("delay", delaySupplier.get())))
+                .mapToObj(d -> dispatcher.dispatch("delayed",new JsonObject().put("delay", delaySupplier.get())))
                 .collect(Collectors.toList())
         ).mapEmpty();
 

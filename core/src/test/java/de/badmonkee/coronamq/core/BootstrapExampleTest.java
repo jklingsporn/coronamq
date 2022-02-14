@@ -7,11 +7,12 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.UUID;
 
 @ExtendWith(VertxExtension.class)
 @Testcontainers
@@ -30,8 +31,8 @@ public class BootstrapExampleTest{
         testContext
                 .assertComplete(spread)
                 //send a new task to the queue
-                .compose(s-> s.publishTask("test",new JsonObject().put("someValue","hi")))
-                .onComplete(testContext.succeeding(Assertions::assertNotNull))
+                .compose(s-> s.dispatch("test",new JsonObject().put("someValue","hi")))
+                .onComplete(testContext.succeeding(UUID::fromString))
                 //complete the work
                 .compose(v-> worker.getCurrentWork())
                 //shut down all components

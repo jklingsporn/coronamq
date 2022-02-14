@@ -1,7 +1,9 @@
 package de.badmonkee.coronamq.core;
 
+import io.vertx.codegen.annotations.DataObject;
 import io.vertx.pgclient.PgConnectOptions;
 
+@DataObject
 public class CoronaMqOptions {
 
     private static final String defaultChannelName = "coronamq_task_update";

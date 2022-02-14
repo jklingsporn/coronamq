@@ -5,12 +5,14 @@ import de.badmonkee.coronamq.core.TaskQueueDao;
 import de.badmonkee.coronamq.core.TaskStatus;
 import de.badmonkee.coronamq.core.Worker;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -45,24 +47,7 @@ public abstract class AbstractWorker implements Worker {
 
     @Override
     public Future<Void> start() {
-        messageConsumer = vertx.eventBus().<JsonObject>consumer(Internal.toWorkerAddress(coronaMqOptions,label), message -> {
-                    try {
-                        if (!running.getAndSet(true)) {
-                            currentWork = handleWork(message.body(),true)
-                                    //if failed or not, we need to reset the running state
-                                    .onComplete(res -> running.set(false))
-                                    //log any exception
-                                    .onFailure(ex -> logger.error(ex.getMessage(),ex))
-                            ;
-                        } else {
-                            logger.debug("Rejecting task, already running.");
-                        }
-                    } catch (Throwable e) {
-                        logger.error(e.getMessage(), e);
-                        running.set(false);
-                    }
-                }
-        );
+        messageConsumer = vertx.eventBus().consumer(Internal.toWorkerAddress(coronaMqOptions,label), new TaskReceivedHandler());
         Promise<Void> registered = Promise.promise();
         messageConsumer.completionHandler(registered);
         return registered.future().compose(v->requestNewTask());
@@ -88,7 +73,9 @@ public abstract class AbstractWorker implements Worker {
                     : Future.<Void>succeededFuture())
                     .compose(v->run(payload))
                     .compose(updatedPayload -> dao.updateTask(taskId.toString(),TaskStatus.COMPLETED,TaskStatus.RUNNING))
+                    //TODO what happens when this fails or DAO is unavailable
                     .compose(v-> requestNewTask())
+                    //TODO can't set failed-state when DAO is unavailable
                     .recover(failTask(taskId));
     }
 
@@ -120,4 +107,24 @@ public abstract class AbstractWorker implements Worker {
         return currentWork;
     }
 
+    class TaskReceivedHandler implements Handler<Message<JsonObject>>{
+
+        @Override
+        public void handle(Message<JsonObject> message) {
+            try {
+                if (!running.getAndSet(true)) {
+                    currentWork = handleWork(message.body(),true)
+                            //if failed or not, we need to reset the running state
+                            .onComplete(res -> running.set(false))
+                            //log any exception
+                            .onFailure(ex -> logger.error(ex.getMessage(),ex));
+                } else {
+                    logger.debug("Rejecting task, already running.");
+                }
+            } catch (Throwable e) {
+                logger.error(e.getMessage(), e);
+                running.set(false);
+            }
+        }
+    }
 }

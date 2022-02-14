@@ -1,8 +1,11 @@
 package de.badmonkee.coronamq.core;
 
+import io.vertx.codegen.annotations.VertxGen;
+
 /**
  * Defines the states of a task.
  */
+@VertxGen
 public enum TaskStatus {
 
     /**

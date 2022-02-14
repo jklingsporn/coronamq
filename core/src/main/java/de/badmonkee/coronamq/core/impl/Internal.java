@@ -9,7 +9,7 @@ class Internal {
 
     private Internal(){}
 
-    public static final int CODE_ERROR_PUBLISH = 1;
+    public static final int CODE_ERROR_DISPATCH = 1;
     public static final int CODE_ERROR_UPDATE = 2;
     public static final int CODE_ERROR_REQUEST = 3;
     public static final int CODE_ERROR_FAIL = 4;

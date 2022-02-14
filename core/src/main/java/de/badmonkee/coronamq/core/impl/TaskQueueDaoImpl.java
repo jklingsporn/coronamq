@@ -51,7 +51,7 @@ class TaskQueueDaoImpl implements TaskQueueDao {
                         TaskStatus.NEW.toString(),
                         LocalDateTime.now(Clock.systemUTC())
                 ), completion);
-        return completion.future().map(newId.toString()).recover(x -> failWithCode(Internal.CODE_ERROR_PUBLISH,x));
+        return completion.future().map(newId.toString()).recover(x -> failWithCode(Internal.CODE_ERROR_DISPATCH,x));
     }
 
     @Override
@@ -66,7 +66,7 @@ class TaskQueueDaoImpl implements TaskQueueDao {
                 .future()
                 .onSuccess(rowSet -> Arguments.require(rowSet.rowCount() == 1,"Not updated"))
                 .<Void>mapEmpty()
-                .recover(x -> failWithCode(Internal.CODE_ERROR_PUBLISH,x));
+                .recover(x -> failWithCode(Internal.CODE_ERROR_FAIL,x));
     }
 
     @Override
@@ -155,39 +155,6 @@ class TaskQueueDaoImpl implements TaskQueueDao {
 
     @Override
     public Future<Void> start() {
-//        MessageConsumer<JsonObject> publishConsumer = vertx.eventBus().<JsonObject>consumer(coronaMqOptions.getTaskPublishAddress(), msg ->
-//                createTask(msg.body().getString("label"), msg.body().getJsonObject("payload"))
-//                        .onSuccess(uuid -> msg.reply(new JsonObject().put("id", uuid.toString())))
-//                        .onFailure(err -> msg.fail(Internal.CODE_ERROR_PUBLISH, err.getMessage()))
-//        );
-//        MessageConsumer<JsonObject> updateConsumer = vertx.eventBus().<JsonObject>consumer(coronaMqOptions.getTaskUpdateAddress(), msg ->
-//                updateTask(
-//                        (msg.body().getString("id")),
-//                        TaskStatus.valueOf(msg.body().getString("newStatus")),
-//                        TaskStatus.valueOf(msg.body().getString("oldStatus"))
-//                )
-//                        .onSuccess(msg::reply)
-//                        .onFailure(err -> msg.fail(Internal.CODE_ERROR_UPDATE, err.getMessage()))
-//        );
-//        MessageConsumer<JsonObject> requestConsumer = vertx.eventBus().<JsonObject>consumer(coronaMqOptions.getTaskRequestAddress(), msg ->
-//                requestTask(msg.body().getString("label"))
-//                        .onSuccess(msg::reply)
-//                        .onFailure(err -> msg.fail(Internal.CODE_ERROR_REQUEST, err.getMessage()))
-//        );
-//        MessageConsumer<JsonObject> failConsumer = vertx.eventBus().<JsonObject>consumer(coronaMqOptions.getTaskFailureAddress(), msg ->
-//                failTask(
-//                        (msg.body().getString("id")),
-//                        msg.body().getString("cause")
-//                )
-//                        .onSuccess(msg::reply)
-//                        .onFailure(err -> msg.fail(Internal.CODE_ERROR_FAIL, err.getMessage()))
-//        );
-//        this.messageConsumers = Arrays.asList(
-//                publishConsumer,
-//                updateConsumer,
-//                requestConsumer,
-//                failConsumer
-//        );
         this.messageConsumer = binder.setAddress(coronaMqOptions.getDaoAddress()).register(TaskQueueDao.class, this);
         Promise<Void> registrationPromise = Promise.promise();
         this.messageConsumer.completionHandler(registrationPromise);

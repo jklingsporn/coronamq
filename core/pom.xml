@@ -11,6 +11,10 @@
 
     <artifactId>core</artifactId>
 
+    <properties>
+        <parent.dir>${project.parent.basedir}</parent.dir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -19,5 +23,106 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/main/generated/</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>proxy</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.bsc.maven</groupId>
+                        <artifactId>maven-processor-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>generate-sources</id>
+                                <goals>
+                                    <goal>process</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <processors>
+                                        <processor>io.vertx.codegen.CodeGenProcessor</processor>
+                                    </processors>
+                                    <outputDirectory>src/main/generated</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>mutiny</id>
+            <dependencies>
+                <dependency>
+                    <groupId>io.smallrye.reactive</groupId>
+                    <artifactId>vertx-mutiny-generator</artifactId>
+                    <version>2.18.1</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>io.smallrye.reactive</groupId>
+                    <artifactId>smallrye-mutiny-vertx-core</artifactId>
+                    <version>${mutiny.bingings.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.smallrye.reactive</groupId>
+                    <artifactId>smallrye-mutiny-vertx-sql-client</artifactId>
+                    <version>${mutiny.bingings.version}</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.bsc.maven</groupId>
+                        <artifactId>maven-processor-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>generate-sources</id>
+                                <goals>
+                                    <goal>process</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <processors>
+                                        <processor>io.vertx.codegen.CodeGenProcessor</processor>
+                                    </processors>
+                                    <optionMap>
+                                        <!-- Don't want to generated proxies, only mutiny -->
+                                        <codegen.generators>mutiny</codegen.generators>
+                                    </optionMap>
+                                    <outputDirectory>${parent.dir}/mutiny/src/main/generated</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

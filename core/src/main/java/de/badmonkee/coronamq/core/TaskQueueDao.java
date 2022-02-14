@@ -19,7 +19,7 @@ public interface TaskQueueDao {
     }
 
     /**
-     * Create a new task in the queue after a task has been published.
+     * Create a new task in the queue after a task has been dispatched.
      * @param label the label
      * @param payload the payload
      * @return  {@link Future} that is completed when the task is added to the queue containing the id associated
