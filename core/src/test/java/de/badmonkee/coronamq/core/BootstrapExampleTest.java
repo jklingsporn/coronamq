@@ -26,6 +26,8 @@ public class BootstrapExampleTest{
         CoronaMqOptions coronaMqOptions = database.getCoronaMqOptions();
         SimpleWorker worker = new SimpleWorker(vertx, coronaMqOptions);
         Future<BootstrapSpreadStep> spread = CoronaMq.create(vertx,coronaMqOptions)
+                .withBroker()
+                .withDao()
                 .withWorker(worker)
                 .spread();
         testContext

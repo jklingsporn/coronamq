@@ -1,5 +1,7 @@
 package de.badmonkee.coronamq.core.bootstrap;
 
+import de.badmonkee.coronamq.core.Broker;
+import de.badmonkee.coronamq.core.TaskQueueDao;
 import de.badmonkee.coronamq.core.Worker;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
@@ -13,6 +15,35 @@ import io.vertx.core.Future;
 @VertxGen
 public interface Bootstrap {
 
+    /**
+     * Adds a {@code TaskQueueDao} with default configuration to this Bootstrap.
+     * @return a reference to this
+     */
+    @Fluent
+    public Bootstrap withDao();
+
+    /**
+     * Adds a {@code TaskQueueDao} to this Bootstrap.
+     * @param dao the dao
+     * @return a reference to this
+     */
+    @Fluent
+    public Bootstrap withDao(TaskQueueDao dao);
+
+    /**
+     * Adds a {@code Broker} with default configuration to this Bootstrap.
+     * @return a reference to this
+     */
+    @Fluent
+    public Bootstrap withBroker();
+
+    /**
+     * Adds a {@code Broker} to this Bootstrap.
+     * @param broker
+     * @return a reference to this
+     */
+    @Fluent
+    public Bootstrap withBroker(Broker broker);
     /**
      * Adds a Worker to this bootstrap.
      * @param worker a worker

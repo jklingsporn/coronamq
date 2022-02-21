@@ -13,6 +13,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -21,8 +22,8 @@ class BootstrapImpl implements Bootstrap, BootstrapSpreadStep {
 
     private final Vertx vertx;
     private final CoronaMqOptions options;
-    private final Broker broker;
-    private final TaskQueueDao dao;
+    private Broker broker;
+    private TaskQueueDao dao;
     private final CopyOnWriteArrayList<Worker> workers = new CopyOnWriteArrayList<>();
     private final AtomicBoolean spread = new AtomicBoolean(false);
     private final AtomicBoolean vaccinated = new AtomicBoolean(false);
@@ -32,13 +33,42 @@ class BootstrapImpl implements Bootstrap, BootstrapSpreadStep {
     BootstrapImpl(Vertx vertx, CoronaMqOptions options) {
         this.vertx = vertx;
         this.options = options;
-        this.broker = CoronaMq.broker(vertx,options);
-        this.dao = CoronaMq.dao(vertx,options);
     }
 
 
     @Override
+    public synchronized Bootstrap withDao() {
+        return withDao(CoronaMq.dao(vertx,options));
+    }
+
+    @Override
+    public synchronized Bootstrap withDao(TaskQueueDao dao) {
+        Objects.requireNonNull(dao);
+        if(this.dao != null){
+            throw new IllegalStateException("Dao already added");
+        }
+        this.dao = dao;
+        return this;
+    }
+
+    @Override
+    public synchronized Bootstrap withBroker() {
+        return withBroker(CoronaMq.broker(vertx,options));
+    }
+
+    @Override
+    public synchronized Bootstrap withBroker(Broker broker) {
+        Objects.requireNonNull(broker);
+        if(this.broker != null){
+            throw new IllegalStateException("Broker already added");
+        }
+        this.broker = broker;
+        return this;
+    }
+
+    @Override
     public Bootstrap withWorker(Worker worker) {
+        Objects.requireNonNull(worker);
         if(spread.get()){
             throw new IllegalStateException("Already spread");
         }
@@ -50,18 +80,16 @@ class BootstrapImpl implements Bootstrap, BootstrapSpreadStep {
     }
 
     @Override
-    public Future<BootstrapSpreadStep> spread() {
+    public synchronized Future<BootstrapSpreadStep> spread() {
         if(!spread.compareAndSet(false,true)){
             return Future.failedFuture(new IllegalStateException("Already spread"));
         }
         if (vaccinated.get()) {
             return Future.failedFuture(new IllegalStateException("Already vaccinated"));
         }
-        synchronized(this){
-            this.state = dao.start()
-                    .compose(v -> broker.start())
-                    .compose(v -> CompositeFuture.all(workers.stream().map(Worker::start).collect(Collectors.toList())).<Void>mapEmpty());
-        }
+        this.state = (dao==null ? Future.succeededFuture() : dao.start())
+                .compose(v -> (broker==null?Future.succeededFuture():broker.start()))
+                .compose(v -> CompositeFuture.all(workers.stream().map(Worker::start).collect(Collectors.toList())).<Void>mapEmpty());
         return this.state.map(this);
     }
 
