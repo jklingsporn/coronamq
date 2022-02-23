@@ -10,6 +10,10 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.impl.Arguments;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
+import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.Status;
+import io.vertx.servicediscovery.types.EventBusService;
 import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.ServiceException;
 import io.vertx.sqlclient.Row;
@@ -26,16 +30,21 @@ import java.util.UUID;
  */
 class TaskQueueDaoImpl implements TaskQueueDao {
 
+    private final Vertx vertx;
     private final CoronaMqOptions coronaMqOptions;
     private final PgPool pool;
     private final ServiceBinder binder;
+    private final ServiceDiscovery serviceDiscovery;
+    private final Promise<Record> registrationResult;
     private MessageConsumer<JsonObject> messageConsumer;
 
-
     public TaskQueueDaoImpl(Vertx vertx, CoronaMqOptions coronaMqOptions, PgPool pool){
+        this.vertx = vertx;
         this.coronaMqOptions = coronaMqOptions;
         this.pool = pool;
         this.binder = new ServiceBinder(vertx);
+        this.serviceDiscovery = ServiceDiscovery.create(vertx, coronaMqOptions.getServiceDiscoveryOptions());
+        this.registrationResult = Promise.promise();
     }
 
     @Override
@@ -153,12 +162,25 @@ class TaskQueueDaoImpl implements TaskQueueDao {
         return completion.future().map(SqlResult::rowCount);
     }
 
+    private <T> Future<T> failWithCode(int code,Throwable x) {
+        return Future.failedFuture(new ServiceException(code, x.getMessage()));
+    }
+
     @Override
     public Future<Void> start() {
         this.messageConsumer = binder.setAddress(coronaMqOptions.getDaoAddress()).register(TaskQueueDao.class, this);
         Promise<Void> registrationPromise = Promise.promise();
         this.messageConsumer.completionHandler(registrationPromise);
-        return registrationPromise.future();
+        return registrationPromise.future()
+                .compose(v->registerToServiceDiscovery())
+                .mapEmpty();
+    }
+
+    private Future<Record> registerToServiceDiscovery(){
+        Record record = EventBusService.createRecord(Internal.DAO_SERVICE_RECORD_NAME, Internal.DAO_SERVICE_RECORD_DISCOVERY, TaskQueueDao.class);
+        //make this service available
+        serviceDiscovery.publish(record,registrationResult);
+        return registrationResult.future();
     }
 
     @Override
@@ -166,6 +188,39 @@ class TaskQueueDaoImpl implements TaskQueueDao {
         if(this.messageConsumer == null){
             return Future.succeededFuture();
         }
+        return gracefullyUnregisterFromServiceDiscovery()
+                .compose(v-> unbindProxy());
+    }
+
+    Future<Void> gracefullyUnregisterFromServiceDiscovery(){
+        if(!registrationResult.future().isComplete()){
+            return Future.failedFuture(new IllegalStateException("Discovery not started."));
+        }
+        return registrationResult.future()
+                //tell everyone that we are leaving
+                .map(rec -> vertx.eventBus().publish(
+                        coronaMqOptions.getServiceDiscoveryOptions().getAnnounceAddress(),
+                        new Record(rec)
+                                .setRegistration(null)
+                                .setStatus(Status.DOWN)
+                                .setMetadata(new JsonObject().put("shutdownInMillis",coronaMqOptions.getDaoGracefulShutdownMillis())).toJson())
+                )
+                //wait a period before we actually go down
+                .compose(v-> waitForShutdown())
+                //unregister from ServiceDiscovery and close resources
+                .compose(v->registrationResult.future())
+                .compose(rec->serviceDiscovery.unpublish(rec.getRegistration()))
+                .onComplete(v->serviceDiscovery.close());
+    }
+
+    private Future<Void> waitForShutdown() {
+        if(coronaMqOptions.getDaoGracefulShutdownMillis() == 0L){
+            return Future.succeededFuture();
+        }
+        return Internal.await(vertx,coronaMqOptions.getDaoGracefulShutdownMillis());
+    }
+
+    private Future<Void> unbindProxy() {
         Promise<Void> unregisterPromise = Promise.promise();
         //manually unregister messageConsumer because binder.unregister returns void...
         messageConsumer.unregister(unregisterPromise);
@@ -173,7 +228,6 @@ class TaskQueueDaoImpl implements TaskQueueDao {
         return unregisterPromise.future();
     }
 
-    private <T> Future<T> failWithCode(int code,Throwable x) {
-        return Future.failedFuture(new ServiceException(code, x.getMessage()));
-    }
+
+
 }

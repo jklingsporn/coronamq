@@ -9,6 +9,8 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
+import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 import io.vertx.sqlclient.PoolOptions;
 
 import java.util.function.Function;
@@ -44,10 +46,21 @@ public class CoronaMq {
 
     private static final CoronaMqOptions DEFAULT_OPTIONS = new CoronaMqOptions();
 
+    /**
+     * The recommended way to create a CoronaMq distribution using a fluent DSL.
+     * @param vertx the vertx instance
+     * @return a {@code Bootstrap} with default options.
+     */
     public static Bootstrap create(Vertx vertx){
         return create(vertx, DEFAULT_OPTIONS);
     }
 
+    /**
+     * The recommended way to create a CoronaMq distribution using a fluent DSL.
+     * @param vertx the vertx instance
+     * @param coronaMqOptions the options.
+     * @return a {@code Bootstrap} using the provided options.
+     */
     public static Bootstrap create(Vertx vertx, CoronaMqOptions coronaMqOptions){
         return new BootstrapImpl(vertx, coronaMqOptions);
     }
@@ -189,6 +202,19 @@ public class CoronaMq {
      */
     public static TaskQueueDao dao(Vertx vertx, CoronaMqOptions coronamqOptions, PgPool pgPool){
         return new TaskQueueDaoImpl(vertx, coronamqOptions, pgPool);
+    }
+
+
+    static ServiceDiscovery serviceDiscoveryInstance = null;
+    static synchronized ServiceDiscovery serviceDiscovery(Vertx vertx){
+        if(serviceDiscoveryInstance == null){
+            serviceDiscoveryInstance = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions()
+                    .setName("corona.mq")
+                    .setAnnounceAddress("coronamq.discovery.announce")
+                    .setUsageAddress("coronamq.discovery.usage")
+            );
+        }
+        return serviceDiscoveryInstance;
     }
 
 

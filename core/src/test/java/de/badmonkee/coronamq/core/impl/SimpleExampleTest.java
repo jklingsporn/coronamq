@@ -1,6 +1,8 @@
-package de.badmonkee.coronamq.core;
+package de.badmonkee.coronamq.core.impl;
 
-import de.badmonkee.coronamq.core.impl.CoronaMq;
+import de.badmonkee.coronamq.core.Broker;
+import de.badmonkee.coronamq.core.Dispatcher;
+import de.badmonkee.coronamq.core.TaskQueueDao;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -61,7 +63,7 @@ public class SimpleExampleTest {
         TaskQueueDao taskQueueDao = CoronaMq.dao(vertx, database.getCoronaMqOptions());
 
         //Some work to fail
-        FailedWorker failedWorker = new FailedWorker(vertx, database.getCoronaMqOptions());
+        FailingWorker failedWorker = new FailingWorker(vertx, database.getCoronaMqOptions());
 
         //Required to add some tasks to the queue
         Dispatcher dispatcher = CoronaMq.dispatcher(vertx);
@@ -86,8 +88,7 @@ public class SimpleExampleTest {
                                 .onSuccess(res -> testContext.completeNow())
                         )
                 )
-                .onFailure(testContext::failNow)
-        ;
+                .onFailure(testContext::failNow);
     }
 
 }

@@ -6,6 +6,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.pgclient.pubsub.PgChannel;
 import io.vertx.pgclient.pubsub.PgSubscriber;
 
 /**
@@ -16,7 +17,7 @@ class BrokerImpl implements Broker {
     private final Vertx vertx;
     private final PgSubscriber subscriber;
     private final CoronaMqOptions coronaMqOptions;
-    private Future<Void> started;
+    private Future<PgChannel> started;
 
     public BrokerImpl(Vertx vertx, CoronaMqOptions coronamqOptions) {
         this.vertx = vertx;
@@ -26,23 +27,28 @@ class BrokerImpl implements Broker {
 
     @Override
     public Future<Void> start() {
+        if(started != null){
+            return started.mapEmpty();
+        }
         Promise<Void> connect = Promise.promise();
         subscriber.connect(connect);
-        started = connect.future().onComplete(v -> {
-            subscriber
-                    .channel(coronaMqOptions.getChannelName())
-                    .handler(payload -> {
-                        JsonObject task = new JsonObject(payload);
-                        vertx.eventBus().send(Internal.toWorkerAddress(coronaMqOptions,task.getString("label")), task);
-                    });
+        started = connect.future().map(v ->
+        {
+            PgChannel channel = subscriber.channel(coronaMqOptions.getChannelName());
+            channel.pause(); //wait for start signal from a DAO
+            channel
+                    .handler(payload -> Internal.sendTask(vertx,coronaMqOptions,new JsonObject(payload)));
+            return channel;
         });
-        return started;
+        return started
+                .mapEmpty()
+                ;
     }
 
     @Override
     public Future<Void> stop() {
         if(started != null && started.isComplete()){
-            subscriber.close();
+            return subscriber.close();
         }
         return Future.succeededFuture();
     }

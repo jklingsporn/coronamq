@@ -41,7 +41,7 @@ public interface TaskQueueDao {
      * @param id the unique id of the task
      * @param newStatus the new status of the task
      * @param oldStatus the expected old status
-     * @return a {@link Future} containing the task's update result.
+     * @return a succeeded {@link Future} if the task could be updated or a failed {@link Future} otherwise.
      */
     public Future<Void> updateTask(String id, TaskStatus newStatus, TaskStatus oldStatus);
 

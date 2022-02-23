@@ -8,9 +8,8 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 
 /**
- * It is advisable to start the Broker, Workers and DAOs in the correct order. For easy setups which include at least
- * the Broker and the DAO, this class can be used. Workers can be added before or after the queue has been "spread"
- * (started).
+ * It is advisable to start the Broker, Workers and DAOs in the correct order. Single node setups required at least
+ * a dao and a broker while workers can be added before or after the queue has been "spread" (started).
  */
 @VertxGen
 public interface Bootstrap {

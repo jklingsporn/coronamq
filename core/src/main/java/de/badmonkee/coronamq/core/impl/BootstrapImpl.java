@@ -87,9 +87,12 @@ class BootstrapImpl implements Bootstrap, BootstrapSpreadStep {
         if (vaccinated.get()) {
             return Future.failedFuture(new IllegalStateException("Already vaccinated"));
         }
+        if(dao == null && broker == null && workers.isEmpty()){
+            return Future.failedFuture(new IllegalStateException("Bootstrap is empty. Please add at last a DAO, Broker or a Worker."));
+        }
         this.state = (dao==null ? Future.succeededFuture() : dao.start())
                 .compose(v -> (broker==null?Future.succeededFuture():broker.start()))
-                .compose(v -> CompositeFuture.all(workers.stream().map(Worker::start).collect(Collectors.toList())).<Void>mapEmpty());
+                .compose(v -> CompositeFuture.all(workers.stream().map(Worker::start).collect(Collectors.toList())).mapEmpty());
         return this.state.map(this);
     }
 

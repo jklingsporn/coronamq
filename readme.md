@@ -23,17 +23,26 @@ activated in three situations:
 
 # Persistent
 The tasks are stored in a PostgreSQL database guaranteeing durability and consistency. Your application might already use a PostgreSQL
-database in the persistence layer so you don't have to bring another player to your system architecture. The fewer players, the less errors.  
+database in the persistence layer, so you don't have to bring another player to your system architecture. The fewer players, the fewer errors.  
 
 # Once
 Many queues out there guarantee `at least once`-delivery which means tasks might get handled twice. But what you really want 
 is `exactly once` delivery. You have one job and it should be done once. However, in a real world, there are network timeouts, 
 database errors et al so the best you can get is `effectively once` delivery and this is what CoronaMQ aims for.
 
+# Cool
+This project is a showcase for various cool features that go beyond a simple "Hello world"-example:
+- [Vertx Service Discovery](https://vertx.io/docs/vertx-service-discovery/java/) to detect service availability
+- [Vertx Service Proxies](https://vertx.io/docs/vertx-service-proxy/java/) to remotely interoperate with the participants
+- [Vertx Codegen](https://github.com/vert-x3/vertx-codegen) to generate [Mutiny](https://smallrye.io/smallrye-mutiny/)-
+  and [RxJava](https://github.com/ReactiveX/RxJava)-APIs
+- [Testcontainers](https://www.testcontainers.org/)) for running the integration tests
+
 # Usage
 
 ## Initial setup
-- For a quick test, you can build and use the provided docker file.
+- To run the tests, you need a running docker daemon.
+- For a more advanced test, you can use the provided docker file.
 - All others need to add the following SQL to their existing database:
 ```
 CREATE TYPE task_status AS ENUM ('NEW', 'RUNNING','COMPLETED','FAILED');
@@ -58,7 +67,10 @@ EXECUTE PROCEDURE task_status_notify();
 
 ## Start and stop order
 The participants have `start`- and `stop`-methods which have to be invoked after they've been created. It is important 
-to start and stop them in the right order or otherwise data might get lost.\
+to start and stop them in the right order or otherwise data might get lost. For that reason, we have a `Bootstrap` which
+takes care of exactly that. \
+
+In case you want to deploy everything on your own, check out the following start and stop order:\
 **Start order**:
  1. TaskQueueDao
  2. Worker
@@ -71,39 +83,31 @@ to start and stop them in the right order or otherwise data might get lost.\
 
 
 ## Code example
-A complete example can be found in the [examples-module](/examples).
 
 ```
 @Test
-public void basicExample(Vertx vertx, VertxTestContext testContext){
-
-    //the broker sends a new task onto the eventbus when it is added
-    Broker broker = CoronaMq.broker(vertx);
-
-    //CRUD for tasks
-    TaskQueueDao taskQueueDao = CoronaMq.dao(vertx);
-
-    //Some work to do
-    SimpleWorker simpleWorker = new SimpleWorker(vertx, new CoronaMqOptions());
-
-    //Add some tasks to the queue
-    Dispatcher dispatcher = CoronaMq.dispatcher(vertx);
-
+public void boostrapExample(Vertx vertx, VertxTestContext testContext){
+    CoronaMqOptions coronaMqOptions = new CoronaMqOptions();
+    SimpleWorker worker = new SimpleWorker(vertx, coronaMqOptions);
+    Future<BootstrapSpreadStep> spread = CoronaMq.create(vertx,coronaMqOptions)
+            .withBroker()
+            .withDao()
+            .withWorker(worker)
+            .spread();
     testContext
-            //start participants in the right order
-            .assertComplete(taskQueueDao.start() //dao first
-                    .compose(v->broker.start()) //... then the broker
-                    .compose(v->simpleWorker.start()) //... 
-            )
+            .assertComplete(spread)
             //send a new task to the queue
-            .compose(v-> dispatcher.dispatchTask("test",new JsonObject().put("someValue","hi")))
+            .compose(s-> s.dispatch("test",new JsonObject().put("someValue","hi")))
+            .onComplete(testContext.succeeding(UUID::fromString))
             //complete the work
-            .compose(v-> simpleWorker.getCurrentWork())
-            .onSuccess(res -> testContext.completeNow())
-            .onFailure(testContext::failNow)
+            .compose(v-> worker.getCurrentWork())
+            //shut down all components
+            .compose(v->spread.compose(BootstrapSpreadStep::vaccinate))
+            .onComplete(testContext.succeedingThenComplete())
     ;
 }
 ```
+More examples can be found in the [examples-module](/examples).
 
 # Community has spoken
 I originally created the project under the name PoXMQ (**Po**stgres Vert**X** **MQ**) but wasn't

@@ -1,7 +1,7 @@
-package de.badmonkee.coronamq.core;
+package de.badmonkee.coronamq.core.impl;
 
+import de.badmonkee.coronamq.core.CoronaMqOptions;
 import de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep;
-import de.badmonkee.coronamq.core.impl.CoronaMq;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -39,8 +39,7 @@ public class BootstrapExampleTest{
                 .compose(v-> worker.getCurrentWork())
                 //shut down all components
                 .compose(v->spread.compose(BootstrapSpreadStep::vaccinate))
-                .onSuccess(res -> testContext.completeNow())
-                .onFailure(testContext::failNow)
+                .onComplete(testContext.succeedingThenComplete())
         ;
     }
 }

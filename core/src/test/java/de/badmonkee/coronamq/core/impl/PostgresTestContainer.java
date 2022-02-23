@@ -1,5 +1,6 @@
-package de.badmonkee.coronamq.core;
+package de.badmonkee.coronamq.core.impl;
 
+import de.badmonkee.coronamq.core.CoronaMqOptions;
 import io.vertx.pgclient.PgConnectOptions;
 import org.testcontainers.containers.PostgreSQLContainer;
 
