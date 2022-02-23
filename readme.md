@@ -1,35 +1,35 @@
 >The simplest way to implement a task queue with Java, Vertx and PostgreSQL. 
 
-# Simple :interrobang:
+# Simple
 There are only three participants in CoronaMQ you have to reason about:
 1. **Worker(s)** act on new tasks added to the queue. Workers are bound to a label which describes the unit of work.
 There can be multiple labels (e.g. PLACE_ORDER, CHECKOUT, etc) and thus workers.
 2. The **broker** listens to additions made to the task queue and *send*s these tasks over the EventBus. There should only
 be one broker per application.
-3. The **TaskRepository** is interacting with the queue in the database. You can deploy it together with the broker, but you don't have to.\
+3. The **TaskRepository** is interacting with the queue in the database. You can deploy it together with the broker, but you don't have to.
 
 There is also the **Dispatcher**: A dispatcher can add tasks to the queue by sending a message on the EventBus. The dispatcher is not
-required as you can also dispatch tasks directly to the EventBus or even into the task-table.\
+required as you can also dispatch tasks directly to the EventBus or even into the task-table.
 
 ![Corona MQ Overview](doc/img/CoronaMQOverview.png?raw=true "Corona MQ Overview")
 
-# Fast :zap:
+# Fast 
 Thanks to PostgresSQL's [NOTIFY/LISTEN](https://www.postgresql.org/docs/current/sql-notify.html) and the
 [fastest PostgresSQL driver for Java](https://github.com/eclipse-vertx/vertx-sql-client) [^1] 
 out there, tasks are instantly pushed to the EventBus. There is no polling. To empty the task queue as fast as possible, 
 workers additionally request tasks when they are deployed and after they've completed a task.
 
-# Persistent :bank:
+# Persistent 
 The tasks are stored in a PostgreSQL database guaranteeing durability and consistency. Your application might already 
 use a PostgreSQL database in the persistence layer, so you don't have to bring another player to your system architecture.
 The fewer players, the fewer errors.  
 
-# Once :1st_place_medal:
+# Once
 Many queues out there guarantee `at least once`-delivery which means tasks might get handled twice. But what you really want 
 is `exactly once` delivery. You have one job - and it should be done once. However, in a real world, there are network timeouts, 
 database errors et al. so the best you can get is `effectively once` delivery and this is what CoronaMQ aims for.
 
-# Cool :dark_sunglasses:
+# Cool
 This project is a showcase for various cool features that go beyond a simple "Hello world"-example:
 - [Vertx Service Discovery](https://vertx.io/docs/vertx-service-discovery/java/) to detect service availability
 - [Vertx Service Proxies](https://vertx.io/docs/vertx-service-proxy/java/) to remotely interoperate with the participants
@@ -37,7 +37,7 @@ This project is a showcase for various cool features that go beyond a simple "He
   and [RxJava](https://github.com/ReactiveX/RxJava)-APIs
 - [Testcontainers](https://www.testcontainers.org/)) for running the integration tests
 
-# Usage :nerd_face:
+# Usage 
 
 ## Initial setup
 - To run the tests, you need a running docker daemon.
@@ -119,4 +119,4 @@ completely satisfied with it. So I made a poll on [twitter](https://twitter.com/
 ![Never feed the trolls](doc/img/NeverFeedTheTrolls.png?raw=true "never feed the trolls")
 
 # Footnotes :mask:
-[^1] https://www.techempower.com/benchmarks/#section=data-r15&hw=ph&test=db
+[^1]: https://www.techempower.com/benchmarks/#section=data-r15&hw=ph&test=db
