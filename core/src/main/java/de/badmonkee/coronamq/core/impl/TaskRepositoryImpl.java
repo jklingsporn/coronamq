@@ -1,7 +1,7 @@
 package de.badmonkee.coronamq.core.impl;
 
 import de.badmonkee.coronamq.core.CoronaMqOptions;
-import de.badmonkee.coronamq.core.TaskQueueDao;
+import de.badmonkee.coronamq.core.TaskRepository;
 import de.badmonkee.coronamq.core.TaskStatus;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -28,7 +28,7 @@ import java.util.UUID;
 /**
  * @author jensklingsporn
  */
-class TaskQueueDaoImpl implements TaskQueueDao {
+class TaskRepositoryImpl implements TaskRepository {
 
     private final Vertx vertx;
     private final CoronaMqOptions coronaMqOptions;
@@ -38,7 +38,7 @@ class TaskQueueDaoImpl implements TaskQueueDao {
     private final Promise<Record> registrationResult;
     private MessageConsumer<JsonObject> messageConsumer;
 
-    public TaskQueueDaoImpl(Vertx vertx, CoronaMqOptions coronaMqOptions, PgPool pool){
+    public TaskRepositoryImpl(Vertx vertx, CoronaMqOptions coronaMqOptions, PgPool pool){
         this.vertx = vertx;
         this.coronaMqOptions = coronaMqOptions;
         this.pool = pool;
@@ -168,7 +168,7 @@ class TaskQueueDaoImpl implements TaskQueueDao {
 
     @Override
     public Future<Void> start() {
-        this.messageConsumer = binder.setAddress(coronaMqOptions.getDaoAddress()).register(TaskQueueDao.class, this);
+        this.messageConsumer = binder.setAddress(coronaMqOptions.getRepositoryAddress()).register(TaskRepository.class, this);
         Promise<Void> registrationPromise = Promise.promise();
         this.messageConsumer.completionHandler(registrationPromise);
         return registrationPromise.future()
@@ -177,7 +177,7 @@ class TaskQueueDaoImpl implements TaskQueueDao {
     }
 
     private Future<Record> registerToServiceDiscovery(){
-        Record record = EventBusService.createRecord(Internal.DAO_SERVICE_RECORD_NAME, Internal.DAO_SERVICE_RECORD_DISCOVERY, TaskQueueDao.class);
+        Record record = EventBusService.createRecord(Internal.REPOSITORY_SERVICE_RECORD_NAME, Internal.REPOSITORY_SERVICE_RECORD_DISCOVERY, TaskRepository.class);
         //make this service available
         serviceDiscovery.publish(record,registrationResult);
         return registrationResult.future();
@@ -203,7 +203,7 @@ class TaskQueueDaoImpl implements TaskQueueDao {
                         new Record(rec)
                                 .setRegistration(null)
                                 .setStatus(Status.DOWN)
-                                .setMetadata(new JsonObject().put("shutdownInMillis",coronaMqOptions.getDaoGracefulShutdownMillis())).toJson())
+                                .setMetadata(new JsonObject().put("shutdownInMillis",coronaMqOptions.getRepositoryGracefulShutdownMillis())).toJson())
                 )
                 //wait a period before we actually go down
                 .compose(v-> waitForShutdown())
@@ -214,10 +214,10 @@ class TaskQueueDaoImpl implements TaskQueueDao {
     }
 
     private Future<Void> waitForShutdown() {
-        if(coronaMqOptions.getDaoGracefulShutdownMillis() == 0L){
+        if(coronaMqOptions.getRepositoryGracefulShutdownMillis() == 0L){
             return Future.succeededFuture();
         }
-        return Internal.await(vertx,coronaMqOptions.getDaoGracefulShutdownMillis());
+        return Internal.await(vertx,coronaMqOptions.getRepositoryGracefulShutdownMillis());
     }
 
     private Future<Void> unbindProxy() {

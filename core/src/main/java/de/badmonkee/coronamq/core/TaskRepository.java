@@ -11,11 +11,11 @@ import io.vertx.core.json.JsonObject;
  */
 @ProxyGen
 @VertxGen
-public interface TaskQueueDao {
+public interface TaskRepository {
 
 
-    public static TaskQueueDao createProxy(Vertx vertx, String address){
-        return new TaskQueueDaoVertxEBProxy(vertx,address);
+    public static TaskRepository createProxy(Vertx vertx, String address){
+        return new TaskRepositoryVertxEBProxy(vertx,address);
     }
 
     /**
@@ -71,13 +71,13 @@ public interface TaskQueueDao {
     public Future<Integer> deleteTask(String id);
 
     /**
-     * Asynchronously starts this dao.
+     * Asynchronously starts this repository.
      * @return a {@link Future} containing the status of the start operation.
      */
     public Future<Void> start();
 
     /**
-     * Asynchronously stops this dao.
+     * Asynchronously stops this repository.
      * @return a {@link Future} containing the status of the stop operation.
      */
     public Future<Void> stop();

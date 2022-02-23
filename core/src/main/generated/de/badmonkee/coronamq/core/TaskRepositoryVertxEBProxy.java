@@ -28,17 +28,17 @@ import io.vertx.serviceproxy.ServiceExceptionMessageCodec;
 */
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class TaskQueueDaoVertxEBProxy implements TaskQueueDao {
+public class TaskRepositoryVertxEBProxy implements TaskRepository {
   private Vertx _vertx;
   private String _address;
   private DeliveryOptions _options;
   private boolean closed;
 
-  public TaskQueueDaoVertxEBProxy(Vertx vertx, String address) {
+  public TaskRepositoryVertxEBProxy(Vertx vertx, String address) {
     this(vertx, address, null);
   }
 
-  public TaskQueueDaoVertxEBProxy(Vertx vertx, String address, DeliveryOptions options) {
+  public TaskRepositoryVertxEBProxy(Vertx vertx, String address, DeliveryOptions options) {
     this._vertx = vertx;
     this._address = address;
     this._options = options;

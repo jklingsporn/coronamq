@@ -21,7 +21,7 @@ import java.util.function.Function;
  *     <li><b>{@link Broker}</b>: The broker listens to additions made to the task queue and sends these tasks over the EventBus.</li>
  *     <li><b>{@link Worker}</b>: The worker acts on new tasks added to the queue. Workers are bound to a label which describes the unit of work.
  *     There can be multiple labels, e.g. PLACE_ORDER and CHECKOUT</li>
- *     <li><b>{@link TaskQueueDao}</b>: The TaskQueueDao is interacting with the queue in the database.</li>
+ *     <li><b>{@link TaskRepository}</b>: The TaskRepository is interacting with the queue in the database.</li>
  * </ul>
  * There is also the <b>{@link Dispatcher}</b>: A dispatcher can add tasks to the queue by sending a message on the EventBus. The dispatcher is not
  * required as you can also dispatch tasks by using the static {@link CoronaMq#dispatch(Vertx, String, String, JsonObject)}</li> method.<br>
@@ -29,7 +29,7 @@ import java.util.function.Function;
  * important to start and stop them in the right order or otherwise data might get lost.<br>
  * Start order:
  * <ul>
- *     <li>1. {@link TaskQueueDao}</li>
+ *     <li>1. {@link TaskRepository}</li>
  *     <li>2. {@link Worker}</li>
  *     <li>3. {@link Broker}</li>
  * </ul>
@@ -37,7 +37,7 @@ import java.util.function.Function;
  * <ul>
  *     <li>1. {@link Broker}</li>
  *     <li>2. {@link Worker}</li>
- *     <li>3. {@link TaskQueueDao}</li>
+ *     <li>3. {@link TaskRepository}</li>
  * </ul>
  */
 public class CoronaMq {
@@ -118,13 +118,13 @@ public class CoronaMq {
      * @see #dispatcher(Vertx, CoronaMqOptions)
      */
     public static Future<String> dispatch(Vertx vertx, String label, JsonObject payload){
-        return dispatch(vertx, DEFAULT_OPTIONS.getDaoAddress(),label,payload);
+        return dispatch(vertx, DEFAULT_OPTIONS.getRepositoryAddress(),label,payload);
     }
 
     /**
      * Statically dispatches a task to the queue.
      * @param vertx the vertx instance.
-     * @param dispatchAddress the EventBus address to send the task to. Must match <code>CoronaMqOptions#getDaoAddress</code>
+     * @param dispatchAddress the EventBus address to send the task to. Must match <code>CoronaMqOptions#getrepositoryAddress</code>
      * @param label the label for the task.
      * @param payload the payload for the task
      * @return a {@link Future} that is completed when the task is added to the queue containing the id associated
@@ -166,42 +166,42 @@ public class CoronaMq {
 
     /**
      * @param vertx the vertx instance.
-     * @return a new {@link TaskQueueDao} with default options, creating a new {@link PgPool}. The TaskQueueDao performs the
+     * @return a new {@link TaskRepository} with default options, creating a new {@link PgPool}. The TaskRepository performs the
      * necessary actions to operate with the task queue.
      */
-    public static TaskQueueDao dao(Vertx vertx){
-        return dao(vertx, DEFAULT_OPTIONS, PgPool.pool(vertx, DEFAULT_OPTIONS.getConnectOptions(), new PoolOptions()));
+    public static TaskRepository repository(Vertx vertx){
+        return repository(vertx, DEFAULT_OPTIONS, PgPool.pool(vertx, DEFAULT_OPTIONS.getConnectOptions(), new PoolOptions()));
     }
 
     /**
      * @param vertx the vertx instance
      * @param pgPool the pool to use
-     * @return a new {@link TaskQueueDao} with default options. The TaskQueueDao performs the
+     * @return a new {@link TaskRepository} with default options. The TaskRepository performs the
      * necessary actions to operate with the task queue.
      */
-    public static TaskQueueDao dao(Vertx vertx, PgPool pgPool){
-        return dao(vertx, DEFAULT_OPTIONS, pgPool);
+    public static TaskRepository repository(Vertx vertx, PgPool pgPool){
+        return repository(vertx, DEFAULT_OPTIONS, pgPool);
     }
 
     /**
      * @param vertx the vertx instance
      * @param coronaMqOptions the options
-     * @return a new {@link TaskQueueDao}. The TaskQueueDao performs the
+     * @return a new {@link TaskRepository}. The TaskRepository performs the
      * necessary actions to operate with the task queue.
      */
-    public static TaskQueueDao dao(Vertx vertx, CoronaMqOptions coronaMqOptions){
-        return new TaskQueueDaoImpl(vertx, coronaMqOptions, PgPool.pool(vertx, coronaMqOptions.getConnectOptions(), new PoolOptions()));
+    public static TaskRepository repository(Vertx vertx, CoronaMqOptions coronaMqOptions){
+        return new TaskRepositoryImpl(vertx, coronaMqOptions, PgPool.pool(vertx, coronaMqOptions.getConnectOptions(), new PoolOptions()));
     }
 
     /**
      * @param vertx the vertx instance
      * @param pgPool the pool to use
      * @param coronamqOptions the options
-     * @return a new {@link TaskQueueDao}. The TaskQueueDao performs the
+     * @return a new {@link TaskRepository}. The TaskRepository performs the
      * necessary actions to operate with the task queue.
      */
-    public static TaskQueueDao dao(Vertx vertx, CoronaMqOptions coronamqOptions, PgPool pgPool){
-        return new TaskQueueDaoImpl(vertx, coronamqOptions, pgPool);
+    public static TaskRepository repository(Vertx vertx, CoronaMqOptions coronamqOptions, PgPool pgPool){
+        return new TaskRepositoryImpl(vertx, coronamqOptions, pgPool);
     }
 
 

@@ -21,6 +21,6 @@ class DispatcherImpl implements Dispatcher {
 
     @Override
     public Future<String> dispatch(String label, JsonObject payload) {
-        return CoronaMq.dispatch(vertx, coronaMqOptions.getDaoAddress(),label,payload);
+        return CoronaMq.dispatch(vertx, coronaMqOptions.getRepositoryAddress(),label,payload);
     }
 }

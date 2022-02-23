@@ -1,6 +1,6 @@
 package de.badmonkee.coronamq.core.impl;
 
-import de.badmonkee.coronamq.core.TaskQueueDao;
+import de.badmonkee.coronamq.core.TaskRepository;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -27,15 +27,15 @@ public class AsyncExampleTest {
     @Test
     public void simpleOutOfOrderStart(Vertx vertx, VertxTestContext testContext){
         SimpleWorker worker = new SimpleWorker(vertx, database.getCoronaMqOptions());
-        TaskQueueDao dao = CoronaMq.dao(vertx, database.getCoronaMqOptions().setDaoGracefulShutdownMillis(500));
+        TaskRepository repository = CoronaMq.repository(vertx, database.getCoronaMqOptions().setRepositoryGracefulShutdownMillis(500));
         testContext.assertComplete(worker.start())
                 //worker is ready, but paused
                 .onSuccess(v->testContext.verify(()->Assertions.assertTrue(worker.isPaused())))
-                .compose(v-> dao.start())
-                //worker is no longer paused, but wait a bit until it is propagated
+                .compose(v-> repository.start())
+                //worker is no longer paused, but wait a bit until the handler is notified
                 .compose(v-> Internal.await(vertx,100))
                 .onSuccess(v->testContext.verify(()->Assertions.assertFalse(worker.isPaused())))
-                .compose(v->dao.stop())
+                .compose(v->repository.stop())
                 .compose(v->worker.stop())
                 .onComplete(testContext.succeedingThenComplete());
     }
@@ -50,7 +50,7 @@ public class AsyncExampleTest {
                 //make sure the task is failed
                 .compose(v-> testContext.assertFailure(worker.getCurrentWork()))
                 .recover(x -> {
-                    //check it's because the worker
+                    //check it's because of the paused worker
                     testContext.verify(()->Assertions.assertEquals("Worker is paused",x.getMessage()));
                     return Future.succeededFuture();
                 })

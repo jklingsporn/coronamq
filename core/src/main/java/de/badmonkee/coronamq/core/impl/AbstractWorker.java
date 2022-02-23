@@ -1,7 +1,7 @@
 package de.badmonkee.coronamq.core.impl;
 
 import de.badmonkee.coronamq.core.CoronaMqOptions;
-import de.badmonkee.coronamq.core.TaskQueueDao;
+import de.badmonkee.coronamq.core.TaskRepository;
 import de.badmonkee.coronamq.core.TaskStatus;
 import de.badmonkee.coronamq.core.Worker;
 import io.vertx.codegen.annotations.Nullable;
@@ -28,7 +28,7 @@ public abstract class AbstractWorker implements Worker {
 
     enum TaskOrigin{
         BROKER,
-        DAO
+        repository
     }
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractWorker.class);
@@ -39,11 +39,11 @@ public abstract class AbstractWorker implements Worker {
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final AtomicBoolean paused = new AtomicBoolean(false);
     /**
-     * Signals that the DAO is about to shut down. The worker can try to finish his task but shouldn't
+     * Signals that the repository is about to shut down. The worker can try to finish his task but shouldn't
      * accept and request more tasks after that.
      */
     private final AtomicBoolean limbo = new AtomicBoolean(false);
-    private final TaskQueueDao dao;
+    private final TaskRepository repository;
     private final ServiceDiscovery serviceDiscovery;
 
     private MessageConsumer<JsonObject> messageConsumer;
@@ -57,7 +57,7 @@ public abstract class AbstractWorker implements Worker {
         this.vertx = vertx;
         this.coronaMqOptions = coronaMqOptions;
         this.label = label;
-        this.dao = TaskQueueDao.createProxy(vertx,coronaMqOptions.getDaoAddress());
+        this.repository = TaskRepository.createProxy(vertx,coronaMqOptions.getRepositoryAddress());
         this.serviceDiscovery = ServiceDiscovery.create(vertx, coronaMqOptions.getServiceDiscoveryOptions());
     }
 
@@ -65,10 +65,10 @@ public abstract class AbstractWorker implements Worker {
     public Future<Void> start() {
         //Listen for tasks that are sent from the broker
         return registerTaskReceivedHandler()
-                //Listen for availability changes from the dao
+                //Listen for availability changes from the repository
                 .onSuccess(v->registerToServiceDiscovery())
-                //Check once if the dao is currently available
-                .compose(v->checkForDaoAvailability())
+                //Check once if the repository is currently available
+                .compose(v->checkForrepositoryAvailability())
                 //request a new task without composing here: we don't want to wait for the task-result
                 .onSuccess(v->requestNewTask())
                 .mapEmpty()
@@ -83,16 +83,16 @@ public abstract class AbstractWorker implements Worker {
     }
 
     private void registerToServiceDiscovery(){
-        //listen for DAO discovery
+        //listen for repository discovery
         discoveryHandler = vertx.eventBus().consumer(coronaMqOptions.getServiceDiscoveryOptions().getAnnounceAddress(), msg -> {
             Record discoverEvent = new Record(msg.body());
-            if(Internal.DAO_SERVICE_RECORD_NAME.equals(discoverEvent.getName())){
+            if(Internal.REPOSITORY_SERVICE_RECORD_NAME.equals(discoverEvent.getName())){
                 if(discoverEvent.getStatus() == Status.UP){
-                    onDaoUP();
+                    onrepositoryUP();
                 }else if(discoverEvent.getStatus().equals(Status.DOWN) && discoverEvent.getMetadata().getLong("shutdownInMillis") != null){
-                    onDaoGracefulShutdown(discoverEvent.getMetadata().getLong("shutdownInMillis"));
+                    onrepositoryGracefulShutdown(discoverEvent.getMetadata().getLong("shutdownInMillis"));
                 }else{
-                    onDaoDown();
+                    onrepositoryDown();
                 }
             }
         });
@@ -125,32 +125,32 @@ public abstract class AbstractWorker implements Worker {
     }
 
     /**
-     * The DAO went away.
+     * The repository went away.
      */
-    protected void onDaoDown(){
+    protected void onrepositoryDown(){
         logger.debug("Worker paused");
         paused.set(true);
     }
 
     /**
-     * The DAO will go away in X seconds. No longer request new tasks.
+     * The repository will go away in X seconds. No longer request new tasks.
      */
-    protected void onDaoGracefulShutdown(long shutdownMillis){
+    protected void onrepositoryGracefulShutdown(long shutdownMillis){
         logger.debug("Worker graceful shutdown");
         limbo.set(true);
     }
 
     /**
-     * The DAO is (back) up
+     * The repository is (back) up
      */
-    protected void onDaoUP(){
+    protected void onrepositoryUP(){
         logger.debug("Worker resumed");
         paused.set(false);
         limbo.set(false);
     }
 
     /**
-     * While this worker has received a task from the eventbus (broker), the DAO went away
+     * While this worker has received a task from the eventbus (broker), the repository went away
      * @param taskId
      * @param message
      */
@@ -159,9 +159,9 @@ public abstract class AbstractWorker implements Worker {
     }
 
     /**
-     * Right after this worker has received a task from the DAO, the DAO went away. This leaves the
+     * Right after this worker has received a task from the repository, the repository went away. This leaves the
      * task in a bad condition as it is marked RUNNING but nothing is actually happening.
-     * TODO: add tasks to a list which is processed when the DAO is available again
+     * TODO: add tasks to a list which is processed when the repository is available again
      * @param taskId
      * @param message
      */
@@ -170,9 +170,9 @@ public abstract class AbstractWorker implements Worker {
     }
 
     /**
-     * Right after this worker has completed a task, the DAO went away. This leaves the
+     * Right after this worker has completed a task, the repository went away. This leaves the
      * task in a bad condition as it is marked RUNNING and ready to be set COMPLETED.
-     * TODO: add tasks to a list which is processed when the DAO is available again
+     * TODO: add tasks to a list which is processed when the repository is available again
      * @param taskId
      * @param message
      */
@@ -201,13 +201,13 @@ public abstract class AbstractWorker implements Worker {
         return paused.get();
     }
 
-    private Future<@Nullable Record> checkForDaoAvailability() {
-        return serviceDiscovery.getRecord(rec -> Internal.DAO_SERVICE_RECORD_NAME.equals(rec.getName()))
+    private Future<@Nullable Record> checkForrepositoryAvailability() {
+        return serviceDiscovery.getRecord(rec -> Internal.REPOSITORY_SERVICE_RECORD_NAME.equals(rec.getName()))
                 .onComplete(rec -> {
                     if(rec.result()==null || rec.result().getStatus() != Status.UP){
-                        onDaoDown();
+                        onrepositoryDown();
                     }else{
-                        onDaoUP();
+                        onrepositoryUP();
                     }
                 });
     }
@@ -217,8 +217,8 @@ public abstract class AbstractWorker implements Worker {
         JsonObject payload = getPayload(message);
         Future<Void> setRunningStep = Future.succeededFuture();
         if(isPaused()){
-            if(taskOrigin.equals(TaskOrigin.DAO)){
-                //the task has been marked RUNNING in the database and then DAO went down
+            if(taskOrigin.equals(TaskOrigin.repository)){
+                //the task has been marked RUNNING in the database and then repository went down
                 taskRequestedWhilePaused(taskId,message);
             }else{
                 //we've received a new task from the broker - just don't do it
@@ -227,21 +227,21 @@ public abstract class AbstractWorker implements Worker {
             return currentWork = failOnPausedWorker();
         }else if(taskOrigin.equals(TaskOrigin.BROKER)){
             //set to running state. This might fail in case two worker are racing
-            setRunningStep = dao.updateTask(taskId.toString(), TaskStatus.RUNNING, TaskStatus.NEW);
+            setRunningStep = repository.updateTask(taskId.toString(), TaskStatus.RUNNING, TaskStatus.NEW);
         }
         return currentWork = setRunningStep
                 //do the work and set the task in FAILED state in case of exceptions
                 .compose(v->run(payload).recover(failTask(taskId,message)))
                 .compose(v->{
                     if(isPaused()){
-                        //we completed our task, but now the DAO is no longer available
+                        //we completed our task, but now the repository is no longer available
                         taskCompletedWhilePaused(taskId,message);
                         return failOnPausedWorker();
                     }
                     return Future.succeededFuture();
                 })
                 //complete the task by setting the new status. If this worker is paused it shouldn't come to this point
-                .compose(v -> dao.updateTask(taskId.toString(),TaskStatus.COMPLETED,TaskStatus.RUNNING))
+                .compose(v -> repository.updateTask(taskId.toString(),TaskStatus.COMPLETED,TaskStatus.RUNNING))
                 .compose(v-> requestNewTask());
     }
 
@@ -256,7 +256,7 @@ public abstract class AbstractWorker implements Worker {
                 taskFailedWhilePaused(taskId,message);
                 return failOnPausedWorker();
             }
-            return dao.failTask(taskId.toString(), ex.getMessage()).mapEmpty();
+            return repository.failTask(taskId.toString(), ex.getMessage()).mapEmpty();
         };
     }
 
@@ -264,11 +264,11 @@ public abstract class AbstractWorker implements Worker {
         if(isPaused() || limbo.get()){
             return Future.succeededFuture();
         }
-        return dao.requestTask(label).compose(newTask -> {
+        return repository.requestTask(label).compose(newTask -> {
             if(newTask == null){
                 return Future.succeededFuture();
             }
-            return handleWork(newTask,TaskOrigin.DAO);
+            return handleWork(newTask,TaskOrigin.repository);
         });
     }
 

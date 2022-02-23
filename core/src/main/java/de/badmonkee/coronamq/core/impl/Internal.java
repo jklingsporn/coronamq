@@ -16,8 +16,8 @@ class Internal {
     static final int CODE_ERROR_REQUEST = 3;
     static final int CODE_ERROR_FAIL = 4;
 
-    static final String DAO_SERVICE_RECORD_NAME = "corona-mq-dao";
-    static final String DAO_SERVICE_RECORD_DISCOVERY = "corona.mq.dao.discovery";
+    static final String REPOSITORY_SERVICE_RECORD_NAME = "corona-mq-repository";
+    static final String REPOSITORY_SERVICE_RECORD_DISCOVERY = "corona.mq.repository.discovery";
 
     static String toWorkerAddress(CoronaMqOptions options, String label){
         return options.getWorkerAddress()+label;

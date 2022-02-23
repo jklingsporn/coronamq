@@ -2,7 +2,7 @@ package de.badmonkee.coronamq.core.impl;
 
 import de.badmonkee.coronamq.core.Broker;
 import de.badmonkee.coronamq.core.CoronaMqOptions;
-import de.badmonkee.coronamq.core.TaskQueueDao;
+import de.badmonkee.coronamq.core.TaskRepository;
 import de.badmonkee.coronamq.core.Worker;
 import de.badmonkee.coronamq.core.bootstrap.Bootstrap;
 import de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep;
@@ -23,7 +23,7 @@ class BootstrapImpl implements Bootstrap, BootstrapSpreadStep {
     private final Vertx vertx;
     private final CoronaMqOptions options;
     private Broker broker;
-    private TaskQueueDao dao;
+    private TaskRepository repository;
     private final CopyOnWriteArrayList<Worker> workers = new CopyOnWriteArrayList<>();
     private final AtomicBoolean spread = new AtomicBoolean(false);
     private final AtomicBoolean vaccinated = new AtomicBoolean(false);
@@ -37,17 +37,17 @@ class BootstrapImpl implements Bootstrap, BootstrapSpreadStep {
 
 
     @Override
-    public synchronized Bootstrap withDao() {
-        return withDao(CoronaMq.dao(vertx,options));
+    public synchronized Bootstrap withRepository() {
+        return withRepository(CoronaMq.repository(vertx,options));
     }
 
     @Override
-    public synchronized Bootstrap withDao(TaskQueueDao dao) {
-        Objects.requireNonNull(dao);
-        if(this.dao != null){
-            throw new IllegalStateException("Dao already added");
+    public synchronized Bootstrap withRepository(TaskRepository repository) {
+        Objects.requireNonNull(repository);
+        if(this.repository != null){
+            throw new IllegalStateException("Repository already added");
         }
-        this.dao = dao;
+        this.repository = repository;
         return this;
     }
 
@@ -87,10 +87,10 @@ class BootstrapImpl implements Bootstrap, BootstrapSpreadStep {
         if (vaccinated.get()) {
             return Future.failedFuture(new IllegalStateException("Already vaccinated"));
         }
-        if(dao == null && broker == null && workers.isEmpty()){
-            return Future.failedFuture(new IllegalStateException("Bootstrap is empty. Please add at last a DAO, Broker or a Worker."));
+        if(repository == null && broker == null && workers.isEmpty()){
+            return Future.failedFuture(new IllegalStateException("Bootstrap is empty. Please add at last a repository, Broker or a Worker."));
         }
-        this.state = (dao==null ? Future.succeededFuture() : dao.start())
+        this.state = (repository==null ? Future.succeededFuture() : repository.start())
                 .compose(v -> (broker==null?Future.succeededFuture():broker.start()))
                 .compose(v -> CompositeFuture.all(workers.stream().map(Worker::start).collect(Collectors.toList())).mapEmpty());
         return this.state.map(this);
@@ -130,7 +130,7 @@ class BootstrapImpl implements Bootstrap, BootstrapSpreadStep {
 
     @Override
     public Future<String> dispatch(String label, JsonObject payload) {
-        return CoronaMq.dispatch(vertx,options.getDaoAddress(),label,payload);
+        return CoronaMq.dispatch(vertx,options.getRepositoryAddress(),label,payload);
     }
 
     @Override
@@ -147,7 +147,7 @@ class BootstrapImpl implements Bootstrap, BootstrapSpreadStep {
             this.state = this.state
                     .compose(v->broker.stop())
                     .compose(v->CompositeFuture.all(workersCopy.stream().map(Worker::stop).collect(Collectors.toList())).<Void>mapEmpty())
-                    .compose(v->dao.stop())
+                    .compose(v->repository.stop())
             ;
         }
         return this.state;

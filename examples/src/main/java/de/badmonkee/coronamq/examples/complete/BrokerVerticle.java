@@ -1,7 +1,7 @@
 package de.badmonkee.coronamq.examples.complete;
 
 import de.badmonkee.coronamq.core.Broker;
-import de.badmonkee.coronamq.core.TaskQueueDao;
+import de.badmonkee.coronamq.core.TaskRepository;
 import de.badmonkee.coronamq.core.impl.CoronaMq;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -21,7 +21,7 @@ public class BrokerVerticle extends AbstractVerticle {
     private static final Logger logger = LoggerFactory.getLogger(BrokerVerticle.class);
 
     private Broker broker;
-    private TaskQueueDao taskQueueDao;
+    private TaskRepository taskRepository;
     private TimeoutStream timeoutStream;
     private LocalDateTime start;
 
@@ -31,9 +31,9 @@ public class BrokerVerticle extends AbstractVerticle {
         start = LocalDateTime.now();
         //the broker sends a new task onto the eventbus when it is added
         broker = CoronaMq.broker(vertx);
-        taskQueueDao = CoronaMq.dao(vertx);
+        taskRepository = CoronaMq.repository(vertx);
 
-        taskQueueDao.start()
+        taskRepository.start()
             .compose(v->broker.start())
             .onComplete(startFuture);
 
@@ -42,7 +42,7 @@ public class BrokerVerticle extends AbstractVerticle {
     }
 
     private Future<Long> countTasks() {
-        return taskQueueDao.countTasks("delayed")
+        return taskRepository.countTasks("delayed")
                 .onComplete(tasksCount -> {
                     logger.info("{} tasks remaining",tasksCount.result());
                     if(tasksCount.result().equals(0L)){
@@ -56,7 +56,7 @@ public class BrokerVerticle extends AbstractVerticle {
     public void stop(Promise<Void> stopFuture) throws Exception {
         timeoutStream.cancel();
         broker.stop()
-                .compose(v->taskQueueDao.stop())
+                .compose(v-> taskRepository.stop())
                 .onComplete(stopFuture);
     }
 }

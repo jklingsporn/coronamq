@@ -20,7 +20,7 @@ import java.util.stream.LongStream;
  * It assumes that there is a postgres database set up with a tasks-table and the triggers. Either run the provided
  * <code>Dockerfile</code> from the parent or add the SQL from <code>core/src/main/resources/00_setup.sql</code> to your existing DB.<br>
  * <ul>
- *     <li>The broker and dao are deployed via the {@link BrokerVerticle}</li>
+ *     <li>The broker and repository are deployed via the {@link BrokerVerticle}</li>
  *     <li>The worker just waits for some time (which is defined by the task's payload) until it completes the task.
  *     The worker is bound to the {@link WorkerVerticle}</li>
  *     <li>You can play around with the instance-count of the {@link WorkerVerticle} to see how it changes the execution time.</li>
@@ -42,7 +42,7 @@ public class CompleteExample {
                 ? () -> ThreadLocalRandom.current().nextLong(10,100)
                 : () -> 50L;
         try{
-            //deploy broker and dao first
+            //deploy broker and repository first
             vertx.deployVerticle(BrokerVerticle.class, new DeploymentOptions(), brokerDeployment);
             brokerDeployment
                     .future()

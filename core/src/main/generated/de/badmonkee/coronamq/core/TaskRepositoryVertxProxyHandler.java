@@ -16,64 +16,42 @@
 
 package de.badmonkee.coronamq.core;
 
-import de.badmonkee.coronamq.core.TaskQueueDao;
 import io.vertx.core.Vertx;
-import io.vertx.core.Handler;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.eventbus.DeliveryOptions;
-import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.JsonArray;
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import io.vertx.serviceproxy.ProxyHandler;
 import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.ServiceExceptionMessageCodec;
 import io.vertx.serviceproxy.HelperUtils;
-import io.vertx.serviceproxy.ServiceBinder;
-
-import de.badmonkee.coronamq.core.TaskQueueDao;
-import io.vertx.core.Vertx;
-import io.vertx.core.Future;
-import de.badmonkee.coronamq.core.TaskStatus;
 /*
   Generated Proxy code - DO NOT EDIT
   @author Roger the Robot
 */
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class TaskQueueDaoVertxProxyHandler extends ProxyHandler {
+public class TaskRepositoryVertxProxyHandler extends ProxyHandler {
 
   public static final long DEFAULT_CONNECTION_TIMEOUT = 5 * 60; // 5 minutes 
   private final Vertx vertx;
-  private final TaskQueueDao service;
+  private final TaskRepository service;
   private final long timerID;
   private long lastAccessed;
   private final long timeoutSeconds;
   private final boolean includeDebugInfo;
 
-  public TaskQueueDaoVertxProxyHandler(Vertx vertx, TaskQueueDao service){
+  public TaskRepositoryVertxProxyHandler(Vertx vertx, TaskRepository service){
     this(vertx, service, DEFAULT_CONNECTION_TIMEOUT);
   }
 
-  public TaskQueueDaoVertxProxyHandler(Vertx vertx, TaskQueueDao service, long timeoutInSecond){
+  public TaskRepositoryVertxProxyHandler(Vertx vertx, TaskRepository service, long timeoutInSecond){
     this(vertx, service, true, timeoutInSecond);
   }
 
-  public TaskQueueDaoVertxProxyHandler(Vertx vertx, TaskQueueDao service, boolean topLevel, long timeoutInSecond){
+  public TaskRepositoryVertxProxyHandler(Vertx vertx, TaskRepository service, boolean topLevel, long timeoutInSecond){
     this(vertx, service, true, timeoutInSecond, false);
   }
 
-  public TaskQueueDaoVertxProxyHandler(Vertx vertx, TaskQueueDao service, boolean topLevel, long timeoutSeconds, boolean includeDebugInfo) {
+  public TaskRepositoryVertxProxyHandler(Vertx vertx, TaskRepository service, boolean topLevel, long timeoutSeconds, boolean includeDebugInfo) {
       this.vertx = vertx;
       this.service = service;
       this.includeDebugInfo = includeDebugInfo;

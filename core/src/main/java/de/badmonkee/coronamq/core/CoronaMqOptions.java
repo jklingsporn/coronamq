@@ -9,8 +9,8 @@ public class CoronaMqOptions {
 
     private static final String defaultChannelName = "coronamq_task_update";
     private static final String defaultWorkerAddress = "coronamq.task.run.";
-    private static final String defaultDaoAddress = "coronamq.dao";
-    private static final long defaultDaoGracefulShutdownMillis = 1000;
+    private static final String defaultrepositoryAddress = "coronamq.repository";
+    private static final long defaultrepositoryGracefulShutdownMillis = 1000;
 
     private static final ServiceDiscoveryOptions serviceDiscoveryOptions = new ServiceDiscoveryOptions()
             .setAnnounceAddress("coronamq.discovery.announce")
@@ -18,16 +18,16 @@ public class CoronaMqOptions {
 
     private String channelName;
     private String workerAddress;
-    private String daoAddress;
-    private long daoGracefulShutdownMillis;
+    private String repositoryAddress;
+    private long repositoryGracefulShutdownMillis;
     private PgConnectOptions connectOptions;
 
     public CoronaMqOptions() {
         this(
                 defaultChannelName,
                 defaultWorkerAddress,
-                defaultDaoAddress,
-                defaultDaoGracefulShutdownMillis,
+                defaultrepositoryAddress,
+                defaultrepositoryGracefulShutdownMillis,
                 new PgConnectOptions()
                     .setPort(5432)
                     .setHost("localhost")
@@ -38,13 +38,13 @@ public class CoronaMqOptions {
 
     public CoronaMqOptions(String channelName,
                            String workerAddress,
-                           String daoAddress,
-                           long daoGracefulShutdownMillis,
+                           String repositoryAddress,
+                           long repositoryGracefulShutdownMillis,
                            PgConnectOptions connectOptions) {
         this.channelName = channelName;
         this.workerAddress = workerAddress;
-        this.daoAddress = daoAddress;
-        this.daoGracefulShutdownMillis = daoGracefulShutdownMillis;
+        this.repositoryAddress = repositoryAddress;
+        this.repositoryGracefulShutdownMillis = repositoryGracefulShutdownMillis;
         this.connectOptions = connectOptions;
     }
 
@@ -75,12 +75,12 @@ public class CoronaMqOptions {
         return this;
     }
 
-    public String getDaoAddress() {
-        return daoAddress;
+    public String getRepositoryAddress() {
+        return repositoryAddress;
     }
 
-    public CoronaMqOptions setDaoAddress(String daoAddress) {
-        this.daoAddress = daoAddress;
+    public CoronaMqOptions setRepositoryAddress(String repositoryAddress) {
+        this.repositoryAddress = repositoryAddress;
         return this;
     }
 
@@ -88,15 +88,15 @@ public class CoronaMqOptions {
         return serviceDiscoveryOptions;
     }
 
-    public long getDaoGracefulShutdownMillis() {
-        return daoGracefulShutdownMillis;
+    public long getRepositoryGracefulShutdownMillis() {
+        return repositoryGracefulShutdownMillis;
     }
 
-    public CoronaMqOptions setDaoGracefulShutdownMillis(long daoGracefulShutdownMillis) {
-        if(daoGracefulShutdownMillis<0){
+    public CoronaMqOptions setRepositoryGracefulShutdownMillis(long repositoryGracefulShutdownMillis) {
+        if(repositoryGracefulShutdownMillis<0){
             throw new IllegalArgumentException("value can not be negative");
         }
-        this.daoGracefulShutdownMillis = daoGracefulShutdownMillis;
+        this.repositoryGracefulShutdownMillis = repositoryGracefulShutdownMillis;
         return this;
     }
 }
