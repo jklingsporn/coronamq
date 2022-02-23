@@ -19,10 +19,10 @@ package de.badmonkee.coronamq.core;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
+import io.vertx.serviceproxy.HelperUtils;
 import io.vertx.serviceproxy.ProxyHandler;
 import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.ServiceExceptionMessageCodec;
-import io.vertx.serviceproxy.HelperUtils;
 /*
   Generated Proxy code - DO NOT EDIT
   @author Roger the Robot

@@ -2,14 +2,15 @@
 
 # Simple
 There are only three participants in CoronaMQ you have to reason about:
-1. **Worker(s)** act on new tasks added to the queue. Workers are bound to a label which describes the unit of work.
+1. **Worker(s)** process tasks that are added to the queue. Workers are bound to a label which describes the unit of work.
 There can be multiple labels (e.g. PLACE_ORDER, CHECKOUT, etc) and thus workers.
-2. The **broker** listens to additions made to the task queue and *send*s these tasks over the EventBus. There should only
-be one broker per application.
-3. The **TaskRepository** is interacting with the queue in the database. You can deploy it together with the broker, but you don't have to.
+2. The **broker** listens to inserts made to the task queue and *send*s these tasks over the EventBus. 
+3. The **TaskRepository** is interacting with the queue in the database. You can deploy it together with the broker, 
+but you don't have to.
 
-There is also the **Dispatcher**: A dispatcher can add tasks to the queue by sending a message on the EventBus. The dispatcher is not
-required as you can also dispatch tasks directly to the EventBus or even into the task-table.
+There is also the **Dispatcher**: A dispatcher can add tasks to the queue by sending a message on the EventBus. Another
+way to add tasks is by adding them directly into the [tasks-table](#initial-setup). 
+
 
 ![Corona MQ Overview](doc/img/CoronaMQOverview.png?raw=true "Corona MQ Overview")
 
@@ -28,14 +29,6 @@ The fewer players, the fewer errors.
 Many queues out there guarantee `at least once`-delivery which means tasks might get handled twice. But what you really want 
 is `exactly once` delivery. You have one job - and it should be done once. However, in a real world, there are network timeouts, 
 database errors et al. so the best you can get is `effectively once` delivery and this is what CoronaMQ aims for.
-
-# Cool
-This project is a showcase for various cool features that go beyond a simple "Hello world"-example:
-- [Vertx Service Discovery](https://vertx.io/docs/vertx-service-discovery/java/) to detect service availability
-- [Vertx Service Proxies](https://vertx.io/docs/vertx-service-proxy/java/) to remotely interoperate with the participants
-- [Vertx Codegen](https://github.com/vert-x3/vertx-codegen) to generate [Mutiny](https://smallrye.io/smallrye-mutiny/)-
-  and [RxJava](https://github.com/ReactiveX/RxJava)-APIs
-- [Testcontainers](https://www.testcontainers.org/)) for running the integration tests
 
 # Usage 
 
@@ -63,22 +56,6 @@ CREATE TRIGGER task_status_change
 	FOR EACH ROW
 EXECUTE PROCEDURE task_status_notify();
 ``` 
-
-## Start and stop order
-The participants `start`- and `stop`-methods have to be invoked in the right order or otherwise data might get lost. 
-For that reason, we have a `Bootstrap`-DSL which takes care of exactly that. \
-
-In case you want to deploy everything on your own, check out the following start and stop order:\
-**Start order**:
- 1. TaskRepository
- 2. Worker
- 3. Broker
-
-**Stop order**:
-1. Broker
-2. Worker
-3. TaskRepository
-
 
 ## Code example
 
@@ -113,7 +90,15 @@ public void boostrapExample(Vertx vertx, VertxTestContext testContext){
 ```
 More examples can be found in the [examples-module](/examples).
 
-# Community has spoken :trollface:
+# Awesome
+This project is a showcase for various cool features that go beyond a simple "Hello world"-example:
+- [Vertx Service Discovery](https://vertx.io/docs/vertx-service-discovery/java/) to detect the repository's availability
+- [Vertx Service Proxies](https://vertx.io/docs/vertx-service-proxy/java/) to remotely interoperate with the repository
+- [Vertx Codegen](https://github.com/vert-x3/vertx-codegen) to generate [Mutiny](https://smallrye.io/smallrye-mutiny/)-
+  and [RxJava](https://github.com/ReactiveX/RxJava)-APIs
+- [Testcontainers](https://www.testcontainers.org/) for running the integration tests
+
+# Community has spoken
 I originally created the project under the name PoXMQ (**Po**stgres Vert**X** **MQ**) but wasn't
 completely satisfied with it. So I made a poll on [twitter](https://twitter.com/klingspoon/status/1245657559484076034) - what could possibly go wrong?
 ![Never feed the trolls](doc/img/NeverFeedTheTrolls.png?raw=true "never feed the trolls")
