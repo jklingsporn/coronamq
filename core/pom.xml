@@ -128,6 +128,50 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>rxjava</id>
+            <dependencies>
+                <dependency>
+                    <groupId>io.vertx</groupId>
+                    <artifactId>vertx-rx-java3</artifactId>
+                    <version>${vertx.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>io.vertx</groupId>
+                    <artifactId>vertx-rx-java3-gen</artifactId>
+                    <version>${vertx.version}</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.bsc.maven</groupId>
+                        <artifactId>maven-processor-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>generate-sources</id>
+                                <goals>
+                                    <goal>process</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <processors>
+                                        <processor>io.vertx.codegen.CodeGenProcessor</processor>
+                                    </processors>
+                                    <optionMap>
+<!--                                         Don't want to generated proxies, only rxjava -->
+                                        <codegen.generators>RxJava3</codegen.generators>
+                                    </optionMap>
+                                    <outputDirectory>${parent.dir}/rxjava/src/main/generated</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
 </project>
