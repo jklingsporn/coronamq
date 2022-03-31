@@ -1,17 +1,10 @@
 package de.badmonkee.coronamq.core.mutiny.bootstrap;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
-import java.util.function.Consumer;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Publisher;
-import io.smallrye.mutiny.vertx.TypeArg;
-import io.vertx.codegen.annotations.Fluent;
 import io.smallrye.common.annotation.CheckReturnValue;
+import io.smallrye.mutiny.vertx.TypeArg;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.Future;
+
+import java.util.List;
 
 @io.smallrye.mutiny.vertx.MutinyGen(de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep.class)
 public class BootstrapSpreadStep {
@@ -41,8 +34,9 @@ public class BootstrapSpreadStep {
     return delegate;
   }
 
-  static final io.smallrye.mutiny.vertx.TypeArg<de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep> TYPE_ARG_1 = new TypeArg<de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep>(o1 -> de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep.newInstance((de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
+  static final io.smallrye.mutiny.vertx.TypeArg<de.badmonkee.coronamq.core.mutiny.Worker> TYPE_ARG_2 = new TypeArg<de.badmonkee.coronamq.core.mutiny.Worker>(o1 -> de.badmonkee.coronamq.core.mutiny.Worker.newInstance((de.badmonkee.coronamq.core.Worker)o1), o1 -> o1.getDelegate());
   static final io.smallrye.mutiny.vertx.TypeArg<de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep> TYPE_ARG_0 = new TypeArg<de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep>(o1 -> de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep.newInstance((de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
+  static final io.smallrye.mutiny.vertx.TypeArg<de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep> TYPE_ARG_1 = new TypeArg<de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep>(o1 -> de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep.newInstance((de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
   @Override
   public String toString() {
     return delegate.toString();
@@ -208,6 +202,30 @@ public class BootstrapSpreadStep {
     vaccinate().subscribe().with(io.smallrye.mutiny.vertx.UniHelper.NOOP);
   }
 
+
+  /**
+   * @return the broker or null.
+   */
+  public de.badmonkee.coronamq.core.mutiny.Broker getBroker() { 
+    de.badmonkee.coronamq.core.mutiny.Broker ret = de.badmonkee.coronamq.core.mutiny.Broker.newInstance((de.badmonkee.coronamq.core.Broker)delegate.getBroker());
+    return ret;
+  }
+
+  /**
+   * @return the repository or null
+   */
+  public de.badmonkee.coronamq.core.mutiny.TaskRepository getRepository() { 
+    de.badmonkee.coronamq.core.mutiny.TaskRepository ret = de.badmonkee.coronamq.core.mutiny.TaskRepository.newInstance((de.badmonkee.coronamq.core.TaskRepository)delegate.getRepository());
+    return ret;
+  }
+
+  /**
+   * @return all current workers, never null.
+   */
+  public List<de.badmonkee.coronamq.core.mutiny.Worker> getWorkers() { 
+    List<de.badmonkee.coronamq.core.mutiny.Worker> ret = delegate.getWorkers().stream().map(elt -> de.badmonkee.coronamq.core.mutiny.Worker.newInstance((de.badmonkee.coronamq.core.Worker)elt)).collect(java.util.stream.Collectors.toList());
+    return ret;
+  }
 
   public static  BootstrapSpreadStep newInstance(de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep arg) {
     return arg != null ? new BootstrapSpreadStep(arg) : null;

@@ -80,6 +80,7 @@ public class BootstrapSpreadStep {
 
   private static final TypeArg<de.badmonkee.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep> TYPE_ARG_0 = new TypeArg<de.badmonkee.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep>(o1 -> de.badmonkee.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep.newInstance((de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
   private static final TypeArg<de.badmonkee.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep> TYPE_ARG_1 = new TypeArg<de.badmonkee.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep>(o1 -> de.badmonkee.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep.newInstance((de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
+  private static final TypeArg<de.badmonkee.coronamq.core.rxjava3.Worker> TYPE_ARG_2 = new TypeArg<de.badmonkee.coronamq.core.rxjava3.Worker>(o1 -> de.badmonkee.coronamq.core.rxjava3.Worker.newInstance((de.badmonkee.coronamq.core.Worker)o1), o1 -> o1.getDelegate());
 
   /**
    * Adds and deploys a Worker to this boostrap.
@@ -163,6 +164,30 @@ public class BootstrapSpreadStep {
    */
   public io.reactivex.rxjava3.core.Completable rxVaccinate() { 
     return AsyncResultCompletable.toCompletable(delegate.vaccinate());
+  }
+
+  /**
+   * @return the broker or null.
+   */
+  public de.badmonkee.coronamq.core.rxjava3.Broker getBroker() { 
+    de.badmonkee.coronamq.core.rxjava3.Broker ret = de.badmonkee.coronamq.core.rxjava3.Broker.newInstance((de.badmonkee.coronamq.core.Broker)delegate.getBroker());
+    return ret;
+  }
+
+  /**
+   * @return the repository or null
+   */
+  public de.badmonkee.coronamq.core.rxjava3.TaskRepository getRepository() { 
+    de.badmonkee.coronamq.core.rxjava3.TaskRepository ret = de.badmonkee.coronamq.core.rxjava3.TaskRepository.newInstance((de.badmonkee.coronamq.core.TaskRepository)delegate.getRepository());
+    return ret;
+  }
+
+  /**
+   * @return all current workers, never null.
+   */
+  public java.util.List<de.badmonkee.coronamq.core.rxjava3.Worker> getWorkers() { 
+    java.util.List<de.badmonkee.coronamq.core.rxjava3.Worker> ret = delegate.getWorkers().stream().map(elt -> de.badmonkee.coronamq.core.rxjava3.Worker.newInstance((de.badmonkee.coronamq.core.Worker)elt)).collect(Collectors.toList());
+    return ret;
   }
 
   public static BootstrapSpreadStep newInstance(de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep arg) {
