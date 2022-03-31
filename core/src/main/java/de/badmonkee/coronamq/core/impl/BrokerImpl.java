@@ -35,7 +35,6 @@ class BrokerImpl implements Broker {
         started = connect.future().map(v ->
         {
             PgChannel channel = subscriber.channel(coronaMqOptions.getChannelName());
-            channel.pause(); //wait for start signal from a repository
             channel
                     .handler(payload -> Internal.sendTask(vertx,coronaMqOptions,new JsonObject(payload)));
             return channel;

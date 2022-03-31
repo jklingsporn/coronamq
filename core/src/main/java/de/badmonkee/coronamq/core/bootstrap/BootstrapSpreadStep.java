@@ -1,9 +1,13 @@
 package de.badmonkee.coronamq.core.bootstrap;
 
+import de.badmonkee.coronamq.core.Broker;
+import de.badmonkee.coronamq.core.TaskRepository;
 import de.badmonkee.coronamq.core.Worker;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
+
+import java.util.List;
 
 @VertxGen
 public interface BootstrapSpreadStep {
@@ -35,5 +39,20 @@ public interface BootstrapSpreadStep {
      * @return a <code>Future</code> that completes once all participants have been unregistered.
      */
     public Future<Void> vaccinate();
+
+    /**
+     * @return the broker or null.
+     */
+    public Broker getBroker();
+
+    /**
+     * @return the repository or null
+     */
+    public TaskRepository getRepository();
+
+    /**
+     * @return all current workers, never null.
+     */
+    public List<Worker> getWorkers();
 
 }

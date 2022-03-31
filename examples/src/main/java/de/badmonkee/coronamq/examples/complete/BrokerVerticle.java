@@ -1,7 +1,6 @@
 package de.badmonkee.coronamq.examples.complete;
 
-import de.badmonkee.coronamq.core.Broker;
-import de.badmonkee.coronamq.core.TaskRepository;
+import de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep;
 import de.badmonkee.coronamq.core.impl.CoronaMq;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -20,8 +19,7 @@ public class BrokerVerticle extends AbstractVerticle {
 
     private static final Logger logger = LoggerFactory.getLogger(BrokerVerticle.class);
 
-    private Broker broker;
-    private TaskRepository taskRepository;
+    private Future<BootstrapSpreadStep> bootstrap;
     private TimeoutStream timeoutStream;
     private LocalDateTime start;
 
@@ -30,19 +28,22 @@ public class BrokerVerticle extends AbstractVerticle {
     public void start(Promise<Void> startFuture) throws Exception {
         start = LocalDateTime.now();
         //the broker sends a new task onto the eventbus when it is added
-        broker = CoronaMq.broker(vertx);
-        taskRepository = CoronaMq.repository(vertx);
-
-        taskRepository.start()
-            .compose(v->broker.start())
-            .onComplete(startFuture);
+        bootstrap = CoronaMq
+                .create(vertx)
+                .withBroker()
+                .withRepository()
+                .spread();
+        bootstrap
+                .<Void>mapEmpty()
+                .onComplete(startFuture);
 
         timeoutStream = vertx.periodicStream(3000)
                 .handler(l -> countTasks());
     }
 
     private Future<Long> countTasks() {
-        return taskRepository.countTasks("delayed")
+        return bootstrap
+                .compose(b -> b.getRepository().countTasks("delayed"))
                 .onComplete(tasksCount -> {
                     logger.info("{} tasks remaining",tasksCount.result());
                     if(tasksCount.result().equals(0L)){
@@ -55,8 +56,8 @@ public class BrokerVerticle extends AbstractVerticle {
     @Override
     public void stop(Promise<Void> stopFuture) throws Exception {
         timeoutStream.cancel();
-        broker.stop()
-                .compose(v-> taskRepository.stop())
+        bootstrap
+                .compose(BootstrapSpreadStep::vaccinate)
                 .onComplete(stopFuture);
     }
 }

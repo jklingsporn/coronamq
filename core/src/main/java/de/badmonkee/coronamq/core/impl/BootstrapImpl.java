@@ -91,7 +91,7 @@ class BootstrapImpl implements Bootstrap, BootstrapSpreadStep {
             return Future.failedFuture(new IllegalStateException("Bootstrap is empty. Please add at last a repository, Broker or a Worker."));
         }
         this.state = (repository==null ? Future.succeededFuture() : repository.start())
-                .compose(v -> (broker==null?Future.succeededFuture():broker.start()))
+                .compose(v -> (broker==null?Future.succeededFuture() : broker.start()))
                 .compose(v -> CompositeFuture.all(workers.stream().map(Worker::start).collect(Collectors.toList())).mapEmpty());
         return this.state.map(this);
     }
@@ -151,5 +151,20 @@ class BootstrapImpl implements Bootstrap, BootstrapSpreadStep {
             ;
         }
         return this.state;
+    }
+
+    @Override
+    public Broker getBroker() {
+        return this.broker;
+    }
+
+    @Override
+    public TaskRepository getRepository() {
+        return this.repository;
+    }
+
+    @Override
+    public List<Worker> getWorkers() {
+        return new ArrayList<>(workers);
     }
 }

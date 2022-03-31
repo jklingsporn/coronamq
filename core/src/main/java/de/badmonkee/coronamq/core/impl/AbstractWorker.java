@@ -28,7 +28,7 @@ public abstract class AbstractWorker implements Worker {
 
     enum TaskOrigin{
         BROKER,
-        repository
+        REPOSITORY
     }
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractWorker.class);
@@ -68,7 +68,7 @@ public abstract class AbstractWorker implements Worker {
                 //Listen for availability changes from the repository
                 .onSuccess(v->registerToServiceDiscovery())
                 //Check once if the repository is currently available
-                .compose(v->checkForrepositoryAvailability())
+                .compose(v-> checkForRepositoryAvailability())
                 //request a new task without composing here: we don't want to wait for the task-result
                 .onSuccess(v->requestNewTask())
                 .mapEmpty()
@@ -88,11 +88,11 @@ public abstract class AbstractWorker implements Worker {
             Record discoverEvent = new Record(msg.body());
             if(Internal.REPOSITORY_SERVICE_RECORD_NAME.equals(discoverEvent.getName())){
                 if(discoverEvent.getStatus() == Status.UP){
-                    onrepositoryUP();
+                    onRepositoryUP();
                 }else if(discoverEvent.getStatus().equals(Status.DOWN) && discoverEvent.getMetadata().getLong("shutdownInMillis") != null){
-                    onrepositoryGracefulShutdown(discoverEvent.getMetadata().getLong("shutdownInMillis"));
+                    onRepositoryGracefulShutdown(discoverEvent.getMetadata().getLong("shutdownInMillis"));
                 }else{
-                    onrepositoryDown();
+                    onRepositoryDown();
                 }
             }
         });
@@ -127,7 +127,7 @@ public abstract class AbstractWorker implements Worker {
     /**
      * The repository went away.
      */
-    protected void onrepositoryDown(){
+    protected void onRepositoryDown(){
         logger.debug("Worker paused");
         paused.set(true);
     }
@@ -135,7 +135,7 @@ public abstract class AbstractWorker implements Worker {
     /**
      * The repository will go away in X seconds. No longer request new tasks.
      */
-    protected void onrepositoryGracefulShutdown(long shutdownMillis){
+    protected void onRepositoryGracefulShutdown(long shutdownMillis){
         logger.debug("Worker graceful shutdown");
         limbo.set(true);
     }
@@ -143,7 +143,7 @@ public abstract class AbstractWorker implements Worker {
     /**
      * The repository is (back) up
      */
-    protected void onrepositoryUP(){
+    protected void onRepositoryUP(){
         logger.debug("Worker resumed");
         paused.set(false);
         limbo.set(false);
@@ -201,13 +201,13 @@ public abstract class AbstractWorker implements Worker {
         return paused.get();
     }
 
-    private Future<@Nullable Record> checkForrepositoryAvailability() {
+    private Future<@Nullable Record> checkForRepositoryAvailability() {
         return serviceDiscovery.getRecord(rec -> Internal.REPOSITORY_SERVICE_RECORD_NAME.equals(rec.getName()))
                 .onComplete(rec -> {
                     if(rec.result()==null || rec.result().getStatus() != Status.UP){
-                        onrepositoryDown();
+                        onRepositoryDown();
                     }else{
-                        onrepositoryUP();
+                        onRepositoryUP();
                     }
                 });
     }
@@ -217,7 +217,7 @@ public abstract class AbstractWorker implements Worker {
         JsonObject payload = getPayload(message);
         Future<Void> setRunningStep = Future.succeededFuture();
         if(isPaused()){
-            if(taskOrigin.equals(TaskOrigin.repository)){
+            if(taskOrigin.equals(TaskOrigin.REPOSITORY)){
                 //the task has been marked RUNNING in the database and then repository went down
                 taskRequestedWhilePaused(taskId,message);
             }else{
@@ -268,7 +268,7 @@ public abstract class AbstractWorker implements Worker {
             if(newTask == null){
                 return Future.succeededFuture();
             }
-            return handleWork(newTask,TaskOrigin.repository);
+            return handleWork(newTask,TaskOrigin.REPOSITORY);
         });
     }
 

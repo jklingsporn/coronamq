@@ -19,6 +19,11 @@ import java.util.stream.LongStream;
  * A complete example of CoronaMQ. It spawns 1000 tasks and measures how long this setup takes to handle all the tasks.
  * It assumes that there is a postgres database set up with a tasks-table and the triggers. Either run the provided
  * <code>Dockerfile</code> from the parent or add the SQL from <code>core/src/main/resources/00_setup.sql</code> to your existing DB.<br>
+ * Docker example:
+ * <code>
+ * 1. docker build -t corona-mq .
+ * 2. docker run -p 5432:5432 -e POSTGRES_PASSWORD=vertx -e POSTGRES_USER=coronamq corona-mq
+ * </code>
  * <ul>
  *     <li>The broker and repository are deployed via the {@link BrokerVerticle}</li>
  *     <li>The worker just waits for some time (which is defined by the task's payload) until it completes the task.
