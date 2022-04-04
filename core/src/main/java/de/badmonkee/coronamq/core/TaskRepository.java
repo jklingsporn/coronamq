@@ -60,9 +60,9 @@ public interface TaskRepository {
 
     /**
      * @param label the label
-     * @return the amount of existing tasks.
+     * @return the amount of existing tasks grouped by status.
      */
-    public Future<Long> countTasks(String label);
+    public Future<JsonObject> countTasks(String label);
 
     /**
      * @param id the id.

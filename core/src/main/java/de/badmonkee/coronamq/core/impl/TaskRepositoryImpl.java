@@ -5,6 +5,7 @@ import de.badmonkee.coronamq.core.TaskRepository;
 import de.badmonkee.coronamq.core.TaskStatus;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.TimeoutStream;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.impl.Arguments;
@@ -20,15 +21,21 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * @author jensklingsporn
  */
 class TaskRepositoryImpl implements TaskRepository {
+
+    private static final Logger logger = LoggerFactory.getLogger(TaskRepositoryImpl.class);
 
     private final Vertx vertx;
     private final CoronaMqOptions coronaMqOptions;
@@ -37,6 +44,7 @@ class TaskRepositoryImpl implements TaskRepository {
     private final ServiceDiscovery serviceDiscovery;
     private final Promise<Record> registrationResult;
     private MessageConsumer<JsonObject> messageConsumer;
+    private TimeoutStream metricsUpdater;
 
     public TaskRepositoryImpl(Vertx vertx, CoronaMqOptions coronaMqOptions, PgPool pool){
         this.vertx = vertx;
@@ -149,10 +157,30 @@ class TaskRepositoryImpl implements TaskRepository {
     }
 
     @Override
-    public Future<Long> countTasks(String label) {
-        Promise<RowSet<Row>> completion = Promise.promise();
-        pool.preparedQuery("SELECT COUNT(*) FROM tasks WHERE label = $1").execute( Tuple.of(label),completion);
-        return completion.future().map(res -> res.iterator().next().getLong(0));
+    public Future<JsonObject> countTasks(String label) {
+        Promise<SqlResult<JsonObject>> completion = Promise.promise();
+        Collector<Row, ?, JsonObject> collector = Collectors.collectingAndThen(
+                Collectors.toList(),
+                rows-> {
+                    JsonObject res = new JsonObject();
+                    rows.stream()
+                            .map(Row::toJson)
+                            .forEach(row ->
+                                    {
+                                        JsonObject labelJson = res.getJsonObject(row.getString("label"), new JsonObject());
+                                        res.put(row.getString("label"),labelJson);
+                                        labelJson.put(row.getString("status"),row.getLong("cnt"));
+                                    }
+                            );
+                    return res;
+                });
+        String sql = label==null
+                ? "SELECT label,status,COUNT(*) as cnt FROM tasks GROUP BY label,status"
+                : "SELECT label,status,COUNT(*) as cnt FROM tasks WHERE label = $1 GROUP BY label,status";
+        pool.preparedQuery(sql)
+                .collecting(collector)
+                .execute(label==null?Tuple.tuple():Tuple.of(label),completion);
+        return completion.future().map(SqlResult::value);
     }
 
     @Override
@@ -173,7 +201,8 @@ class TaskRepositoryImpl implements TaskRepository {
         this.messageConsumer.completionHandler(registrationPromise);
         return registrationPromise.future()
                 .compose(v->registerToServiceDiscovery())
-                .mapEmpty();
+                .<Void>mapEmpty()
+                .onSuccess(v-> startMetrics());
     }
 
     private Future<Record> registerToServiceDiscovery(){
@@ -183,13 +212,25 @@ class TaskRepositoryImpl implements TaskRepository {
         return registrationResult.future();
     }
 
+    private void startMetrics(){
+        if(vertx.isMetricsEnabled()){
+            metricsUpdater = vertx.periodicStream(1000)
+                    .handler(l -> countTasks(null)
+                            .onSuccess(res -> vertx.eventBus().publish(coronaMqOptions.getMetricsAddress(),new JsonObject().put("type","gauge").put("name","task_count").put("data",res)))
+                            .onFailure(x->logger.error("Failed fetching task count "+x.getMessage(),x))
+                    );
+            metricsUpdater.exceptionHandler(x -> logger.error("Failed publishing metrics: "+x.getMessage(),x));
+        }
+    }
+
     @Override
     public Future<Void> stop() {
         if(this.messageConsumer == null){
             return Future.succeededFuture();
         }
         return gracefullyUnregisterFromServiceDiscovery()
-                .compose(v-> unbindProxy());
+                .compose(v-> unbindProxy())
+                .onComplete(v-> stopMetrics());
     }
 
     Future<Void> gracefullyUnregisterFromServiceDiscovery(){
@@ -228,6 +269,12 @@ class TaskRepositoryImpl implements TaskRepository {
         return unregisterPromise.future();
     }
 
+    private void stopMetrics(){
+        if(vertx.isMetricsEnabled()){
+            metricsUpdater.cancel();
+            metricsUpdater = null;
+        }
+    }
 
 
 }

@@ -9,8 +9,9 @@ public class CoronaMqOptions {
 
     private static final String defaultChannelName = "coronamq_task_update";
     private static final String defaultWorkerAddress = "coronamq.task.run.";
-    private static final String defaultrepositoryAddress = "coronamq.repository";
-    private static final long defaultrepositoryGracefulShutdownMillis = 1000;
+    private static final String defaultRepositoryAddress = "coronamq.repository";
+    private static final String defaultMetricsAddress = "coronamq.metrics";
+    private static final long defaultRepositoryGracefulShutdownMillis = 1000;
 
     private static final ServiceDiscoveryOptions serviceDiscoveryOptions = new ServiceDiscoveryOptions()
             .setAnnounceAddress("coronamq.discovery.announce")
@@ -19,6 +20,7 @@ public class CoronaMqOptions {
     private String channelName;
     private String workerAddress;
     private String repositoryAddress;
+    private String metricsAddress;
     private long repositoryGracefulShutdownMillis;
     private PgConnectOptions connectOptions;
 
@@ -26,8 +28,9 @@ public class CoronaMqOptions {
         this(
                 defaultChannelName,
                 defaultWorkerAddress,
-                defaultrepositoryAddress,
-                defaultrepositoryGracefulShutdownMillis,
+                defaultRepositoryAddress,
+                defaultMetricsAddress,
+                defaultRepositoryGracefulShutdownMillis,
                 new PgConnectOptions()
                     .setPort(5432)
                     .setHost("localhost")
@@ -39,11 +42,13 @@ public class CoronaMqOptions {
     public CoronaMqOptions(String channelName,
                            String workerAddress,
                            String repositoryAddress,
+                           String metricsAddress,
                            long repositoryGracefulShutdownMillis,
                            PgConnectOptions connectOptions) {
         this.channelName = channelName;
         this.workerAddress = workerAddress;
         this.repositoryAddress = repositoryAddress;
+        this.metricsAddress = metricsAddress;
         this.repositoryGracefulShutdownMillis = repositoryGracefulShutdownMillis;
         this.connectOptions = connectOptions;
     }
@@ -97,6 +102,15 @@ public class CoronaMqOptions {
             throw new IllegalArgumentException("value can not be negative");
         }
         this.repositoryGracefulShutdownMillis = repositoryGracefulShutdownMillis;
+        return this;
+    }
+
+    public String getMetricsAddress() {
+        return metricsAddress;
+    }
+
+    public CoronaMqOptions setMetricsAddress(String metricsAddress) {
+        this.metricsAddress = metricsAddress;
         return this;
     }
 }

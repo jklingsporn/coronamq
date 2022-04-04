@@ -6,6 +6,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.TimeoutStream;
+import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,12 +42,12 @@ public class BrokerVerticle extends AbstractVerticle {
                 .handler(l -> countTasks());
     }
 
-    private Future<Long> countTasks() {
+    private Future<JsonObject> countTasks() {
         return bootstrap
                 .compose(b -> b.getRepository().countTasks("delayed"))
                 .onComplete(tasksCount -> {
-                    logger.info("{} tasks remaining",tasksCount.result());
-                    if(tasksCount.result().equals(0L)){
+                    logger.info("{} ",tasksCount.result());
+                    if(tasksCount.result().isEmpty()){
                         logger.info("Shutting down. Completion took {}", Duration.between(start,LocalDateTime.now()));
                         vertx.close();
                     }

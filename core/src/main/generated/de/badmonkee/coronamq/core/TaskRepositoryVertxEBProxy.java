@@ -113,14 +113,14 @@ public class TaskRepositoryVertxEBProxy implements TaskRepository {
     });
   }
   @Override
-  public Future<Long> countTasks(String label){
+  public Future<JsonObject> countTasks(String label){
     if (closed) return io.vertx.core.Future.failedFuture("Proxy is closed");
     JsonObject _json = new JsonObject();
     _json.put("label", label);
 
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "countTasks");
-    return _vertx.eventBus().<Long>request(_address, _json, _deliveryOptions).map(msg -> {
+    return _vertx.eventBus().<JsonObject>request(_address, _json, _deliveryOptions).map(msg -> {
       return msg.body();
     });
   }

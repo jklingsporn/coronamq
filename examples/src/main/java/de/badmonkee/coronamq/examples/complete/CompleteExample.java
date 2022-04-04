@@ -1,12 +1,16 @@
 package de.badmonkee.coronamq.examples.complete;
 
+import de.badmonkee.coronamq.core.CoronaMqOptions;
 import de.badmonkee.coronamq.core.Dispatcher;
 import de.badmonkee.coronamq.core.impl.CoronaMq;
+import de.badmonkee.coronamq.metrics.MicrometerMetricsVerticle;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.JdkLoggerFactory;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
+import io.vertx.micrometer.MicrometerMetricsOptions;
+import io.vertx.micrometer.VertxPrometheusOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,26 +43,48 @@ public class CompleteExample {
     public static void main(String[] args) {
         InternalLoggerFactory.setDefaultFactory(JdkLoggerFactory.INSTANCE);
         System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory.class.getName());
-        Vertx vertx = Vertx.vertx();
+
+        /*
+         *
+         * In order to watch the metrics, you need to
+         * 1. Run prometheus server:
+         *      docker run -p 9090:9090 -v ${PWD}/examples/src/main/resources/:/etc/prometheus prom/prometheus
+         *      (WATCH OUT: path to prometheus config only works when running from parent)
+         *      -> 127.0.0.1:9090
+         * 2. Run grafana server:
+         *      docker run -d -p 3000:3000 -it grafana/grafana-oss
+         *      -> goto 127.0.0.1:3000
+         *      -> login / set new password
+         *      -> create a prometheus datasource: http://host.docker.internal:9090
+         *      -> import the dashboard from /examples/src/main/resources/dashboard.json
+         *
+         * See also: https://github.com/vertx-howtos/metrics-prometheus-grafana-howto
+         *
+         */
+        MicrometerMetricsOptions metricsOptions = new MicrometerMetricsOptions()
+                .setEnabled(true)
+                .setPrometheusOptions(new VertxPrometheusOptions().setEnabled(true));
+        VertxOptions vertxOptions = new VertxOptions()
+                .setMetricsOptions(metricsOptions);
+        Vertx vertx = Vertx.vertx(vertxOptions);
+
         Promise<String> brokerDeployment = Promise.promise();
         Promise<String> workerDeployment = Promise.promise();
+        Promise<String> metricsDeployment = Promise.promise();
         boolean randomDelay = args.length>0 && Boolean.parseBoolean(args[1]);
         Supplier<Long> delaySupplier = randomDelay
                 ? () -> ThreadLocalRandom.current().nextLong(10,100)
                 : () -> 50L;
         try{
-            //deploy broker and repository first
             vertx.deployVerticle(BrokerVerticle.class, new DeploymentOptions(), brokerDeployment);
-            brokerDeployment
-                    .future()
-                    .compose(deploymentId -> {
-                        vertx.deployVerticle(
-                                WorkerVerticle.class,
-                                //tweak the instance count and see how completion time varies
-                                new DeploymentOptions().setInstances(10),
-                                workerDeployment);
-                        return workerDeployment.future();
-                    })
+            vertx.deployVerticle(
+                    WorkerVerticle.class,
+                    //tweak the instance count and see how completion time varies
+                    new DeploymentOptions().setInstances(10),
+                    workerDeployment);
+            vertx.deployVerticle(new MicrometerMetricsVerticle(new CoronaMqOptions()), new DeploymentOptions(), metricsDeployment);
+            CompositeFuture
+                    .all(brokerDeployment.future(),workerDeployment.future(),metricsDeployment.future())
                     //everything is in place, now create some tasks
                     .compose(deploymentId -> dispatchTasks(vertx,delaySupplier))
                     .onFailure(ex -> logger.error(ex.getMessage(),ex))
@@ -73,7 +99,7 @@ public class CompleteExample {
     private static Future<Void> dispatchTasks(Vertx vertx, Supplier<Long> delaySupplier) {
         Dispatcher dispatcher = CoronaMq.dispatcher(vertx);
         return CompositeFuture.all(LongStream
-                .range(0,1000)
+                .range(0,40000)
                 .mapToObj(d -> dispatcher.dispatch("delayed",new JsonObject().put("delay", delaySupplier.get())))
                 .collect(Collectors.toList())
         ).mapEmpty();

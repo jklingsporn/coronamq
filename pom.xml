@@ -13,6 +13,7 @@
         <module>examples</module>
         <module>mutiny</module>
         <module>rxjava</module>
+        <module>metrics</module>
     </modules>
 
     <properties>

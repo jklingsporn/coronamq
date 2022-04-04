@@ -203,10 +203,10 @@ public class TaskRepository {
 
   /**
    * @param label the label
-   * @return the amount of existing tasks.
+   * @return the amount of existing tasks grouped by status.
    */
-  public io.reactivex.rxjava3.core.Single<java.lang.Long> countTasks(java.lang.String label) { 
-    io.reactivex.rxjava3.core.Single<java.lang.Long> ret = rxCountTasks(label);
+  public io.reactivex.rxjava3.core.Single<io.vertx.core.json.JsonObject> countTasks(java.lang.String label) { 
+    io.reactivex.rxjava3.core.Single<io.vertx.core.json.JsonObject> ret = rxCountTasks(label);
     ret = ret.cache();
     ret.subscribe(io.vertx.rxjava3.SingleHelper.nullObserver());
     return ret;
@@ -214,9 +214,9 @@ public class TaskRepository {
 
   /**
    * @param label the label
-   * @return the amount of existing tasks.
+   * @return the amount of existing tasks grouped by status.
    */
-  public io.reactivex.rxjava3.core.Single<java.lang.Long> rxCountTasks(java.lang.String label) { 
+  public io.reactivex.rxjava3.core.Single<io.vertx.core.json.JsonObject> rxCountTasks(java.lang.String label) { 
     return AsyncResultSingle.toSingle(delegate.countTasks(label), __value -> __value);
   }
 

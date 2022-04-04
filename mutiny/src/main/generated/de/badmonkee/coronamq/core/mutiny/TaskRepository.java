@@ -276,7 +276,7 @@ public class TaskRepository {
    * @return the {@link io.smallrye.mutiny.Uni uni} firing the result of the operation when completed, or a failure if the operation failed.
    */
   @CheckReturnValue
-  public io.smallrye.mutiny.Uni<Long> countTasks(String label) { 
+  public io.smallrye.mutiny.Uni<JsonObject> countTasks(String label) { 
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.countTasks(label));}
 
   /**
@@ -285,9 +285,9 @@ public class TaskRepository {
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
    * @param label the label
-   * @return the Long instance produced by the operation.
+   * @return the JsonObject instance produced by the operation.
    */
-  public Long countTasksAndAwait(String label) { 
+  public JsonObject countTasksAndAwait(String label) { 
     return countTasks(label).await().indefinitely();
   }
 

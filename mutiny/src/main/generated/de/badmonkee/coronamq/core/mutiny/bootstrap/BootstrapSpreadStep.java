@@ -1,10 +1,18 @@
 package de.badmonkee.coronamq.core.mutiny.bootstrap;
 
-import io.smallrye.common.annotation.CheckReturnValue;
+import java.util.Map;
+import java.util.stream.Collectors;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import java.util.function.Consumer;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Publisher;
 import io.smallrye.mutiny.vertx.TypeArg;
-import io.vertx.core.json.JsonObject;
-
+import io.vertx.codegen.annotations.Fluent;
+import io.smallrye.common.annotation.CheckReturnValue;
 import java.util.List;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.Future;
 
 @io.smallrye.mutiny.vertx.MutinyGen(de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep.class)
 public class BootstrapSpreadStep {
@@ -35,8 +43,8 @@ public class BootstrapSpreadStep {
   }
 
   static final io.smallrye.mutiny.vertx.TypeArg<de.badmonkee.coronamq.core.mutiny.Worker> TYPE_ARG_2 = new TypeArg<de.badmonkee.coronamq.core.mutiny.Worker>(o1 -> de.badmonkee.coronamq.core.mutiny.Worker.newInstance((de.badmonkee.coronamq.core.Worker)o1), o1 -> o1.getDelegate());
-  static final io.smallrye.mutiny.vertx.TypeArg<de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep> TYPE_ARG_0 = new TypeArg<de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep>(o1 -> de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep.newInstance((de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
   static final io.smallrye.mutiny.vertx.TypeArg<de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep> TYPE_ARG_1 = new TypeArg<de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep>(o1 -> de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep.newInstance((de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
+  static final io.smallrye.mutiny.vertx.TypeArg<de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep> TYPE_ARG_0 = new TypeArg<de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep>(o1 -> de.badmonkee.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep.newInstance((de.badmonkee.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
   @Override
   public String toString() {
     return delegate.toString();
