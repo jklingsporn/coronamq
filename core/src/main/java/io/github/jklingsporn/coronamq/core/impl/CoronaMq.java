@@ -1,8 +1,7 @@
 package io.github.jklingsporn.coronamq.core.impl;
 
-import de.badmonkee.coronamq.core.*;
-import io.github.jklingsporn.coronamq.core.bootstrap.Bootstrap;
 import io.github.jklingsporn.coronamq.core.*;
+import io.github.jklingsporn.coronamq.core.bootstrap.Bootstrap;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -10,8 +9,6 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
-import io.vertx.servicediscovery.ServiceDiscovery;
-import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 import io.vertx.sqlclient.PoolOptions;
 
 import java.util.function.Function;
@@ -136,7 +133,7 @@ public class CoronaMq {
     public static Future<String> dispatch(Vertx vertx, String dispatchAddress, String label, JsonObject payload){
         Promise<Message<String>> promise = Promise.promise();
         vertx.eventBus().request(dispatchAddress, new JsonObject().put("label",label).put("payload",payload),new DeliveryOptions().addHeader("action","createTask"), promise);
-        return promise.future().map(msg -> msg.body());
+        return promise.future().map(Message::body);
     }
 
     /**
@@ -203,19 +200,6 @@ public class CoronaMq {
      */
     public static TaskRepository repository(Vertx vertx, CoronaMqOptions coronamqOptions, PgPool pgPool){
         return new TaskRepositoryImpl(vertx, coronamqOptions, pgPool);
-    }
-
-
-    static ServiceDiscovery serviceDiscoveryInstance = null;
-    static synchronized ServiceDiscovery serviceDiscovery(Vertx vertx){
-        if(serviceDiscoveryInstance == null){
-            serviceDiscoveryInstance = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions()
-                    .setName("corona.mq")
-                    .setAnnounceAddress("coronamq.discovery.announce")
-                    .setUsageAddress("coronamq.discovery.usage")
-            );
-        }
-        return serviceDiscoveryInstance;
     }
 
 
