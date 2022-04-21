@@ -33,7 +33,7 @@ database errors et al. so the best you can get is `effectively once` delivery an
 # Usage 
 
 ## Initial setup
-- To run the tests, you need a running docker daemon.
+- To run the examples, you need a running docker daemon.
 - For a more advanced test, you can use the provided docker file.
 - All others need to add the following SQL to their existing database:
 ```
@@ -93,10 +93,12 @@ More examples can be found in the [examples-module](/examples).
 # Awesome
 This project is a showcase for various cool features that go beyond a simple "Hello world"-example:
 - [Vertx Service Discovery](https://vertx.io/docs/vertx-service-discovery/java/) to detect the repository's availability
-- [Vertx Service Proxies](https://vertx.io/docs/vertx-service-proxy/java/) to remotely interoperate with the repository
+- [Vertx Service Proxies](https://vertx.io/docs/vertx-service-proxy/java/) to remotely interoperate with the repository using
+it's interface
 - [Vertx Codegen](https://github.com/vert-x3/vertx-codegen) to generate [Mutiny](https://smallrye.io/smallrye-mutiny/)-
   and [RxJava](https://github.com/ReactiveX/RxJava)-APIs
 - [Testcontainers](https://www.testcontainers.org/) for running the integration tests
+- [Micrometer Metrics](https://vertx.io/docs/vertx-micrometer-metrics/java/) to see what's going on 
 
 # Community has spoken
 I originally created the project under the name PoXMQ (**Po**stgres Vert**X** **MQ**) but wasn't
