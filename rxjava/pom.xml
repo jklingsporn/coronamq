@@ -23,6 +23,11 @@
             <version>${vertx.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-rx-java3</artifactId>
+            <version>${vertx.version}</version>
+        </dependency>
+        <dependency>
             <groupId>de.badmonkee.coronamq</groupId>
             <artifactId>core</artifactId>
             <version>${project.version}</version>

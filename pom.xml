@@ -17,7 +17,7 @@
     </modules>
 
     <properties>
-        <vertx.version>4.2.7</vertx.version>
+        <vertx.version>4.3.1</vertx.version>
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
         <maven-surefire-plugin.version>2.19</maven-surefire-plugin.version>
         <junit-platform-surefire-provider.version>1.0.1</junit-platform-surefire-provider.version>
@@ -31,7 +31,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.release>11</maven.compiler.release>
-        <rxjava.version>3.1.3</rxjava.version>
+        <rxjava.version>3.1.5</rxjava.version>
     </properties>
 
     <description>The simplest way to implement a task queue with Java, Vertx and PostgreSQL. </description>
