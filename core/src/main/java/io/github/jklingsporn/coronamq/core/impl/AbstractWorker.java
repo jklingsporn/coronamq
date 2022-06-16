@@ -31,6 +31,30 @@ public abstract class AbstractWorker implements Worker {
         REPOSITORY
     }
 
+    enum TaskProcessState {
+        /**
+         * Successfully marked the task running.
+         */
+        SET_RUNNING_OK,
+        /**
+         * Failed marking the task running. Usually because another worker already took it.
+         */
+        SET_RUNNING_FAILED,
+        /**
+         * Successfully executed the task by this worker.
+         */
+        RUN_OK,
+        /**
+         * Unsuccessfully executed the task by this worker.
+         */
+        RUN_FAILED,
+        /**
+         * Successfully marked the task completed.
+         */
+        COMPLETED,
+        PAUSED
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(AbstractWorker.class);
 
     protected final Vertx vertx;
@@ -212,10 +236,24 @@ public abstract class AbstractWorker implements Worker {
                 });
     }
 
-    private Future<Void> handleWork(JsonObject message, TaskOrigin taskOrigin) {
+    /**
+     * Every worker follows the given protocol whenever a task arrives
+     * <ol>
+     *     <li>Check if the worker is paused (because repository is offline) and fail early if so.</li>
+     *     <li>Set the state of the task to RUNNING in the database. This might fail if another worker is requesting the
+     *     task in between. If the task fails, request a new task.</li>
+     *     <li>Run the task. If the execution fails for whatever reason, set the state to FAILED and request a new task.</li>
+     *     <li>If the task completes, check if the worker is paused. If it paused, complete with a failure and don't
+     *     request a new task. Set the task COMPLETED otherwise and request a new task.</li>
+     * </ol>
+     * @param message the task payload
+     * @param taskOrigin the origin
+     * @return the result of the current task process
+     */
+    private Future<Void> processTask(JsonObject message, TaskOrigin taskOrigin) {
         UUID taskId = getId(message);
         JsonObject payload = getPayload(message);
-        Future<Void> setRunningStep = Future.succeededFuture();
+        Future<TaskProcessState> setRunningStep = Future.succeededFuture(TaskProcessState.SET_RUNNING_OK);
         if(isPaused()){
             if(taskOrigin.equals(TaskOrigin.REPOSITORY)){
                 //the task has been marked RUNNING in the database and then repository went down
@@ -227,36 +265,59 @@ public abstract class AbstractWorker implements Worker {
             return currentWork = failOnPausedWorker();
         }else if(taskOrigin.equals(TaskOrigin.BROKER)){
             //set to running state. This might fail in case two worker are racing
-            setRunningStep = repository.updateTask(taskId.toString(), TaskStatus.RUNNING, TaskStatus.NEW);
+            setRunningStep = repository.updateTask(taskId.toString(), TaskStatus.RUNNING, TaskStatus.NEW)
+                    .map(v -> TaskProcessState.SET_RUNNING_OK)
+                    .recover(x -> Future.succeededFuture(TaskProcessState.SET_RUNNING_FAILED));
         }
         return currentWork = setRunningStep
                 //do the work and set the task in FAILED state in case of exceptions
-                .compose(v->run(payload).recover(failTask(taskId,message)))
-                .compose(v->{
-                    if(isPaused()){
+                .compose(state->{
+                    if(state.equals(TaskProcessState.SET_RUNNING_OK)){
+                        return run(payload).map(v2-> TaskProcessState.RUN_OK).recover(failTask(taskId,message));
+                    }
+                    return Future.succeededFuture(state);
+                })
+                .compose(state->{
+                    if(state.equals(TaskProcessState.RUN_OK) && isPaused()){
                         //we completed our task, but now the repository is no longer available
                         taskCompletedWhilePaused(taskId,message);
-                        return failOnPausedWorker();
+                        return failOnPausedWorker().map(v -> TaskProcessState.PAUSED);
                     }
-                    return Future.succeededFuture();
+                    return Future.succeededFuture(state);
                 })
                 //complete the task by setting the new status. If this worker is paused it shouldn't come to this point
-                .compose(v -> repository.updateTask(taskId.toString(),TaskStatus.COMPLETED,TaskStatus.RUNNING))
-                .compose(v-> requestNewTask());
+                .compose(state -> {
+                    if(state.equals(TaskProcessState.RUN_OK)){
+                        return repository.updateTask(taskId.toString(),TaskStatus.COMPLETED,TaskStatus.RUNNING).map(v-> TaskProcessState.COMPLETED);
+                    }
+                    return Future.succeededFuture(state);
+                })
+                .compose(state -> {
+                    boolean isCompleted = state.equals(TaskProcessState.COMPLETED);
+                    boolean otherWorkerWon = state.equals(TaskProcessState.SET_RUNNING_FAILED);
+                    boolean currentExecutionFailed = state.equals(TaskProcessState.RUN_FAILED);
+                    if(isCompleted
+                            || otherWorkerWon
+                            || currentExecutionFailed){
+                        return requestNewTask();
+                    }
+                    return Future.succeededFuture();
+                });
     }
 
     protected Future<Void> failOnPausedWorker() {
         return Future.failedFuture("Worker is paused");
     }
 
-    private Function<Throwable, Future<Void>> failTask(UUID taskId, JsonObject message) {
+    private Function<Throwable, Future<TaskProcessState>> failTask(UUID taskId, JsonObject message) {
         return ex -> {
             logger.error("Failed running task "+ex, ex);
             if(isPaused()){
                 taskFailedWhilePaused(taskId,message);
-                return failOnPausedWorker();
+                //because failOnPausedWorker returns a failed future, TaskProcessState will never be set
+                return failOnPausedWorker().map(v-> TaskProcessState.PAUSED);
             }
-            return repository.failTask(taskId.toString(), ex.getMessage()).mapEmpty();
+            return repository.failTask(taskId.toString(), ex.getMessage()).map(v-> TaskProcessState.RUN_FAILED);
         };
     }
 
@@ -268,7 +329,7 @@ public abstract class AbstractWorker implements Worker {
             if(newTask == null){
                 return Future.succeededFuture();
             }
-            return handleWork(newTask,TaskOrigin.REPOSITORY);
+            return processTask(newTask,TaskOrigin.REPOSITORY);
         });
     }
 
@@ -286,7 +347,7 @@ public abstract class AbstractWorker implements Worker {
         public void handle(Message<JsonObject> message) {
             try {
                 if (!running.getAndSet(true)) {
-                    handleWork(message.body(),TaskOrigin.BROKER)
+                    processTask(message.body(),TaskOrigin.BROKER)
                             //if failed or not, we need to reset the running state
                             .onComplete(res -> running.set(false))
                             //log any exception
