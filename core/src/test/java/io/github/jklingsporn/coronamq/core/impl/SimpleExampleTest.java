@@ -47,7 +47,8 @@ public class SimpleExampleTest {
                 //send a new task to the queue
                 .compose(v-> dispatcher.dispatch("test",new JsonObject().put("someValue","hi")))
                 //complete the work
-                .compose(v-> simpleWorker.getCurrentWork())
+                .compose(id-> simpleWorker.getCurrentWork())
+                .compose(v->simpleWorker.stop().compose(v2->broker.stop()).compose(v3->taskRepository.stop()))
                 .onSuccess(res -> testContext.completeNow())
                 .onFailure(testContext::failNow)
         ;
@@ -85,6 +86,7 @@ public class SimpleExampleTest {
                                         .getString("cause"))))
                                 .compose(json -> taskRepository.deleteTask(id.toString()))
                                 .onSuccess(deleted -> testContext.verify(()->Assertions.assertEquals(1,deleted.intValue())))
+                                .compose(v1->failedWorker.stop().compose(v2->broker.stop()).compose(v3->taskRepository.stop()))
                                 .onSuccess(res -> testContext.completeNow())
                         )
                 )

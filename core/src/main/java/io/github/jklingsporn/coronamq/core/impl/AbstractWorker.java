@@ -240,8 +240,8 @@ public abstract class AbstractWorker implements Worker {
      * Every worker follows the given protocol whenever a task arrives
      * <ol>
      *     <li>Check if the worker is paused (because repository is offline) and fail early if so.</li>
-     *     <li>Set the state of the task to RUNNING in the database. This might fail if another worker is requesting the
-     *     task in between. If the task fails, request a new task.</li>
+     *     <li>Set the state of the task to RUNNING in the database if it is received from the broker.
+     *     This might fail if another worker is requesting the task in between. If the task fails, request a new task.</li>
      *     <li>Run the task. If the execution fails for whatever reason, set the state to FAILED and request a new task.</li>
      *     <li>If the task completes, check if the worker is paused. If it paused, complete with a failure and don't
      *     request a new task. Set the task COMPLETED otherwise and request a new task.</li>
@@ -270,7 +270,7 @@ public abstract class AbstractWorker implements Worker {
                     .recover(x -> Future.succeededFuture(TaskProcessState.SET_RUNNING_FAILED));
         }
         return currentWork = setRunningStep
-                //do the work and set the task in FAILED state in case of exceptions
+                //do the work and set the RUN_OK status
                 .compose(state->{
                     if(state.equals(TaskProcessState.SET_RUNNING_OK)){
                         return run(payload).map(v2-> TaskProcessState.RUN_OK).recover(failTask(taskId,message));

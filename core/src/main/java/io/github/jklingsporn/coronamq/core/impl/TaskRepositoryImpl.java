@@ -8,7 +8,6 @@ import io.vertx.core.Promise;
 import io.vertx.core.TimeoutStream;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.impl.Arguments;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
 import io.vertx.servicediscovery.Record;
@@ -27,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -58,30 +58,36 @@ class TaskRepositoryImpl implements TaskRepository {
     @Override
     public Future<String> createTask(String label, JsonObject payload) {
         Promise<RowSet<Row>> completion = Promise.promise();
-
         UUID newId = UUID.randomUUID();
-        pool.preparedQuery("INSERT INTO tasks (id,label, payload, status, update_time) VALUES ($1, $2, $3, $4, $5)").execute(Tuple
-                .of(
-                        newId,
-                        label,
-                        payload,
-                        TaskStatus.NEW.toString(),
-                        LocalDateTime.now(Clock.systemUTC())
-                ), completion);
-        return completion.future().map(newId.toString()).recover(x -> failWithCode(Internal.CODE_ERROR_DISPATCH,x));
+        logger.debug("Inserting task {}",newId);
+        pool.preparedQuery("INSERT INTO tasks (id,label, payload, status, update_time) VALUES ($1, $2, $3, $4, $5)")
+                .execute(Tuple
+                    .of(
+                            newId,
+                            label,
+                            payload,
+                            TaskStatus.NEW.toString(),
+                            LocalDateTime.now(Clock.systemUTC())
+                    ), completion);
+        return completion.future()
+                .compose(assumeRowCountOrFail(1,"Failed inserting task "+newId))
+                .map(newId.toString())
+                .recover(x -> failWithCode(Internal.CODE_ERROR_DISPATCH,x));
     }
 
     @Override
     public Future<Void> failTask(String id, String reason) {
         Promise<RowSet<Row>> completion = Promise.promise();
-        pool.preparedQuery("UPDATE tasks SET status = 'FAILED', payload = payload || $1 WHERE id = $2 AND status = 'RUNNING'").execute(Tuple
-                .of(
-                        new JsonObject().put("error",new JsonObject().put("cause",reason)),
-                        UUID.fromString(id)
-                ), completion);
+        logger.debug("Task {} failed",id);
+        pool.preparedQuery("UPDATE tasks SET status = 'FAILED', payload = payload || $1 WHERE id = $2 AND status = 'RUNNING'")
+                .execute(Tuple
+                    .of(
+                            new JsonObject().put("error",new JsonObject().put("cause",reason)),
+                            UUID.fromString(id)
+                    ), completion);
         return completion
                 .future()
-                .onSuccess(rowSet -> Arguments.require(rowSet.rowCount() == 1,"Not updated"))
+                .compose(assumeRowCountOrFail(1,"Failed updating to FAILED from RUNNING for "+id))
                 .<Void>mapEmpty()
                 .recover(x -> failWithCode(Internal.CODE_ERROR_FAIL,x));
     }
@@ -90,18 +96,21 @@ class TaskRepositoryImpl implements TaskRepository {
     public Future<Void> updateTask(String id, TaskStatus newStatus, TaskStatus oldStatus) {
         Promise<RowSet<Row>> completion = Promise.promise();
         if(newStatus.equals(TaskStatus.COMPLETED)){
+            logger.debug("Deleting task {}",id);
             pool.preparedQuery("DELETE FROM tasks WHERE id = $1 AND status = $2").execute(Tuple.of(UUID.fromString(id),oldStatus.toString()),completion);
         }else{
-            pool.preparedQuery("UPDATE tasks SET status = $1 WHERE id = $2 AND status = $3").execute(Tuple
-                    .of(
-                            newStatus.toString(),
-                            UUID.fromString(id),
-                            oldStatus.toString()
-                    ), completion);
+            logger.debug("Updating task {} from {} to {}",id,oldStatus,newStatus);
+            pool.preparedQuery("UPDATE tasks SET status = $1 WHERE id = $2 AND status = $3")
+                    .execute(Tuple
+                        .of(
+                                newStatus.toString(),
+                                UUID.fromString(id),
+                                oldStatus.toString()
+                        ), completion);
         }
         return completion
                 .future()
-                .onSuccess(rowSet -> Arguments.require(rowSet.rowCount() == 1,"Not updated"))
+                .compose(assumeRowCountOrFail(1,String.format("Failed updating to %s from %s for %s",newStatus,oldStatus,id)))
                 .<Void>mapEmpty()
                 .recover(x -> failWithCode(Internal.CODE_ERROR_UPDATE,x));
     }
@@ -145,7 +154,7 @@ class TaskRepositoryImpl implements TaskRepository {
         return completion.future()
                 .compose(rowSet -> {
                     if(!rowSet.iterator().hasNext()){
-                        Future.failedFuture("Task does not exist "+id);
+                        return Future.failedFuture("Task does not exist "+id);
                     }
                     return Future.succeededFuture(rowSet.iterator().next());
                 })
@@ -276,5 +285,14 @@ class TaskRepositoryImpl implements TaskRepository {
         }
     }
 
+    private static Function<RowSet<Row>,Future<RowSet<Row>>> assumeRowCountOrFail(Integer expectedRowCount, String failMessage){
+        return rowSet -> {
+            if(rowSet.rowCount() != expectedRowCount){
+                return Future.failedFuture(new IllegalStateException(failMessage));
+            }
+            return Future.succeededFuture(rowSet);
+        };
+
+    }
 
 }
