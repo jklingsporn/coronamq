@@ -6,7 +6,6 @@ import io.smallrye.common.annotation.CheckReturnValue;
  * A wrapper around a {@link io.vertx.mutiny.pgclient.pubsub.PgSubscriber} - instance that listens to changes in the tasks table via NOTIFY/LISTEN.
  * There should be only one broker per application.
  *
- * <p/>
  * NOTE: This class has been automatically generated from the {@link io.github.jklingsporn.coronamq.core.Broker original} non Mutiny-ified interface using Vert.x codegen.
  */
 

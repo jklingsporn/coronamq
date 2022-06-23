@@ -23,6 +23,11 @@
             <version>${mutiny.bingings.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.smallrye.reactive</groupId>
+            <artifactId>smallrye-mutiny-vertx-pg-client</artifactId>
+            <version>${mutiny.bingings.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.github.jklingsporn</groupId>
             <artifactId>coronamq-core</artifactId>
             <version>${project.version}</version>

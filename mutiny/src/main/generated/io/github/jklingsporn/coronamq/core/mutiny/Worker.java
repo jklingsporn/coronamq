@@ -7,7 +7,6 @@ import io.vertx.core.json.JsonObject;
  * A worker to work on tasks from the task queue. A worker is bound to a 'label' which describes the unit of work of this
  * worker.
  *
- * <p/>
  * NOTE: This class has been automatically generated from the {@link io.github.jklingsporn.coronamq.core.Worker original} non Mutiny-ified interface using Vert.x codegen.
  */
 

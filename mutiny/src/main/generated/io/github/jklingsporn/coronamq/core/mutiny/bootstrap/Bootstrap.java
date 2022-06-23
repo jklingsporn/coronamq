@@ -11,7 +11,6 @@ import io.smallrye.common.annotation.CheckReturnValue;
  * It is advisable to start the Broker, Workers and repositorys in the correct order. Single node setups required at least
  * a repository and a broker while workers can be added before or after the queue has been "spread" (started).
  *
- * <p/>
  * NOTE: This class has been automatically generated from the {@link io.github.jklingsporn.coronamq.core.bootstrap.Bootstrap original} non Mutiny-ified interface using Vert.x codegen.
  */
 

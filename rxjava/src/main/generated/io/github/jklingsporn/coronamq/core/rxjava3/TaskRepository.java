@@ -25,7 +25,6 @@ import io.vertx.lang.rx.TypeArg;
 /**
  * Necessary actions to operate with the task queue.
  *
- * <p/>
  * NOTE: This class has been automatically generated from the {@link io.github.jklingsporn.coronamq.core.TaskRepository original} non RX-ified interface using Vert.x codegen.
  */
 

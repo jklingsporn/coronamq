@@ -15,6 +15,8 @@ import java.util.function.Function;
 
 /**
  * Static factory to create the required participants in order to make CoronaMq work.<br>
+ * For most use-cases, the {@link CoronaMq#create(Vertx)} method should suffice. If you're interested in the internals
+ * you can keep on reading.<br>
  * <ul>
  *     <li><b>{@link Broker}</b>: The broker listens to additions made to the task queue and sends these tasks over the EventBus.</li>
  *     <li><b>{@link Worker}</b>: The worker acts on new tasks added to the queue. Workers are bound to a label which describes the unit of work.
@@ -22,21 +24,21 @@ import java.util.function.Function;
  *     <li><b>{@link TaskRepository}</b>: The TaskRepository is interacting with the queue in the database.</li>
  * </ul>
  * There is also the <b>{@link Dispatcher}</b>: A dispatcher can add tasks to the queue by sending a message on the EventBus. The dispatcher is not
- * required as you can also dispatch tasks by using the static {@link CoronaMq#dispatch(Vertx, String, String, JsonObject)}</li> method.<br>
+ * required as you can also dispatch tasks by using the static {@link CoronaMq#dispatch(Vertx, String, String, JsonObject)} method.<br>
  * Note that the required participants have <code>start</code>- and <code>stop</code>-methods which have to be invoked after they've been created. It is
  * important to start and stop them in the right order or otherwise data might get lost.<br>
  * Start order:
- * <ul>
- *     <li>1. {@link TaskRepository}</li>
- *     <li>2. {@link Worker}</li>
- *     <li>3. {@link Broker}</li>
- * </ul>
+ * <ol>
+ *     <li>{@link TaskRepository}</li>
+ *     <li>{@link Worker}</li>
+ *     <li>{@link Broker}</li>
+ * </ol>
  * Stop order:
- * <ul>
- *     <li>1. {@link Broker}</li>
- *     <li>2. {@link Worker}</li>
- *     <li>3. {@link TaskRepository}</li>
- * </ul>
+ * <ol>
+ *     <li>{@link Broker}</li>
+ *     <li>{@link Worker}</li>
+ *     <li>{@link TaskRepository}</li>
+ * </ol>
  */
 public class CoronaMq {
 

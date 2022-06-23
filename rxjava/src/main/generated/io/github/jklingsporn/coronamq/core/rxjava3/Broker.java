@@ -24,7 +24,6 @@ import io.vertx.lang.rx.TypeArg;
  * A wrapper around a {@link io.vertx.rxjava3.pgclient.pubsub.PgSubscriber} - instance that listens to changes in the tasks table via NOTIFY/LISTEN.
  * There should be only one broker per application.
  *
- * <p/>
  * NOTE: This class has been automatically generated from the {@link io.github.jklingsporn.coronamq.core.Broker original} non RX-ified interface using Vert.x codegen.
  */
 

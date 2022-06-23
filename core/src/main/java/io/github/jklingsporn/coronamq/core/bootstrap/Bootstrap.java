@@ -8,7 +8,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 
 /**
- * It is advisable to start the Broker, Workers and repositorys in the correct order. Single node setups required at least
+ * It is advisable to start the Broker, Workers and repositories in the correct order. Single node setups required at least
  * a repository and a broker while workers can be added before or after the queue has been "spread" (started).
  */
 @VertxGen

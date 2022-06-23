@@ -6,7 +6,6 @@ import io.vertx.core.json.JsonObject;
 /**
  * Any instance that can dispatch tasks to the queue.
  *
- * <p/>
  * NOTE: This class has been automatically generated from the {@link io.github.jklingsporn.coronamq.core.Dispatcher original} non Mutiny-ified interface using Vert.x codegen.
  */
 

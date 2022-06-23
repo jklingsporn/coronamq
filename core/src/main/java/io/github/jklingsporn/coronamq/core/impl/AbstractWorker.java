@@ -158,6 +158,7 @@ public abstract class AbstractWorker implements Worker {
 
     /**
      * The repository will go away in X seconds. No longer request new tasks.
+     * @param shutdownMillis
      */
     protected void onRepositoryGracefulShutdown(long shutdownMillis){
         logger.debug("Worker graceful shutdown");

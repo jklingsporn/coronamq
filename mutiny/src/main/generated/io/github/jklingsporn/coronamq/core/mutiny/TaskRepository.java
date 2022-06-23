@@ -7,7 +7,6 @@ import io.github.jklingsporn.coronamq.core.TaskStatus;
 /**
  * Necessary actions to operate with the task queue.
  *
- * <p/>
  * NOTE: This class has been automatically generated from the {@link io.github.jklingsporn.coronamq.core.TaskRepository original} non Mutiny-ified interface using Vert.x codegen.
  */
 
