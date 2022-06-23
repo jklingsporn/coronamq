@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>coronamq-rxjava</artifactId>
-
+    <name>rxjava</name>
     <dependencies>
         <dependency>
             <groupId>io.reactivex.rxjava3</groupId>

@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>coronamq-mutiny</artifactId>
-
+    <name>mutiny</name>
     <dependencies>
         <dependency>
             <groupId>io.smallrye.reactive</groupId>
