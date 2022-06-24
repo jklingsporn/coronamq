@@ -73,7 +73,7 @@ public void boostrapExample(Vertx vertx, VertxTestContext testContext){
             .withBroker()
             .withRepository()
             .withWorker(worker)
-            .spread(); //
+            .spread(); //spread the wor(l)d
             
     testContext
             .assertComplete(spread)
@@ -88,7 +88,7 @@ public void boostrapExample(Vertx vertx, VertxTestContext testContext){
     ;
 }
 ```
-More examples can be found in the [examples-module](/examples).
+More examples can be found in the [examples-module](/coronamq-examples).
 
 # Awesome
 This project is a showcase for various cool features that go beyond a simple "Hello world"-example:
