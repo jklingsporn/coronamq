@@ -28,9 +28,9 @@
         <mutiny.version>1.5.0</mutiny.version>
         <mutiny.bingings.version>2.22.0</mutiny.bingings.version>
         <slf4j-api.version>1.7.36</slf4j-api.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
         <rxjava.version>3.1.5</rxjava.version>
     </properties>
 

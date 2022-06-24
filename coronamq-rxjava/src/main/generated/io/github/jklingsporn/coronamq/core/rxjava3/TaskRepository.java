@@ -16,15 +16,15 @@
 
 package io.github.jklingsporn.coronamq.core.rxjava3;
 
-import io.github.jklingsporn.coronamq.core.TaskStatus;
-import io.vertx.rxjava3.impl.AsyncResultSingle;
-import io.vertx.rxjava3.impl.AsyncResultCompletable;
 import io.vertx.lang.rx.RxGen;
 import io.vertx.lang.rx.TypeArg;
+import io.vertx.rxjava3.impl.AsyncResultCompletable;
+import io.vertx.rxjava3.impl.AsyncResultSingle;
 
 /**
  * Necessary actions to operate with the task queue.
  *
+ * <p/>
  * NOTE: This class has been automatically generated from the {@link io.github.jklingsporn.coronamq.core.TaskRepository original} non RX-ified interface using Vert.x codegen.
  */
 
@@ -68,8 +68,8 @@ public class TaskRepository {
   }
 
 
-  public static TaskRepository createProxy(io.vertx.rxjava3.core.Vertx vertx, java.lang.String address) {
-    TaskRepository ret = TaskRepository.newInstance((io.github.jklingsporn.coronamq.core.TaskRepository) io.github.jklingsporn.coronamq.core.TaskRepository.createProxy(vertx.getDelegate(), address));
+  public static io.github.jklingsporn.coronamq.core.rxjava3.TaskRepository createProxy(io.vertx.rxjava3.core.Vertx vertx, java.lang.String address) { 
+    io.github.jklingsporn.coronamq.core.rxjava3.TaskRepository ret = io.github.jklingsporn.coronamq.core.rxjava3.TaskRepository.newInstance((io.github.jklingsporn.coronamq.core.TaskRepository)io.github.jklingsporn.coronamq.core.TaskRepository.createProxy(vertx.getDelegate(), address));
     return ret;
   }
 
@@ -126,7 +126,7 @@ public class TaskRepository {
    * @param oldStatus the expected old status
    * @return a succeeded  if the task could be updated or a failed  otherwise.
    */
-  public io.reactivex.rxjava3.core.Completable updateTask(java.lang.String id, TaskStatus newStatus, TaskStatus oldStatus) {
+  public io.reactivex.rxjava3.core.Completable updateTask(java.lang.String id, io.github.jklingsporn.coronamq.core.TaskStatus newStatus, io.github.jklingsporn.coronamq.core.TaskStatus oldStatus) { 
     io.reactivex.rxjava3.core.Completable ret = rxUpdateTask(id, newStatus, oldStatus);
     ret = ret.cache();
     ret.subscribe(io.vertx.rxjava3.CompletableHelper.nullObserver());
@@ -140,7 +140,7 @@ public class TaskRepository {
    * @param oldStatus the expected old status
    * @return a succeeded  if the task could be updated or a failed  otherwise.
    */
-  public io.reactivex.rxjava3.core.Completable rxUpdateTask(java.lang.String id, TaskStatus newStatus, TaskStatus oldStatus) {
+  public io.reactivex.rxjava3.core.Completable rxUpdateTask(java.lang.String id, io.github.jklingsporn.coronamq.core.TaskStatus newStatus, io.github.jklingsporn.coronamq.core.TaskStatus oldStatus) { 
     return AsyncResultCompletable.toCompletable(delegate.updateTask(id, newStatus, oldStatus));
   }
 

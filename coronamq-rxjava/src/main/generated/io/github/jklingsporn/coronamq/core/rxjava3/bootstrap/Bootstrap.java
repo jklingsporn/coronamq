@@ -16,17 +16,15 @@
 
 package io.github.jklingsporn.coronamq.core.rxjava3.bootstrap;
 
-import io.github.jklingsporn.coronamq.core.rxjava3.Broker;
-import io.github.jklingsporn.coronamq.core.rxjava3.TaskRepository;
-import io.github.jklingsporn.coronamq.core.rxjava3.Worker;
-import io.vertx.rxjava3.impl.AsyncResultSingle;
 import io.vertx.lang.rx.RxGen;
 import io.vertx.lang.rx.TypeArg;
+import io.vertx.rxjava3.impl.AsyncResultSingle;
 
 /**
- * It is advisable to start the Broker, Workers and repositorys in the correct order. Single node setups required at least
+ * It is advisable to start the Broker, Workers and repositories in the correct order. Single node setups required at least
  * a repository and a broker while workers can be added before or after the queue has been "spread" (started).
  *
+ * <p/>
  * NOTE: This class has been automatically generated from the {@link io.github.jklingsporn.coronamq.core.bootstrap.Bootstrap original} non RX-ified interface using Vert.x codegen.
  */
 
@@ -69,13 +67,13 @@ public class Bootstrap {
     return delegate;
   }
 
-  private static final TypeArg<BootstrapSpreadStep> TYPE_ARG_0 = new TypeArg<BootstrapSpreadStep>(o1 -> BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
+  private static final TypeArg<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep> TYPE_ARG_0 = new TypeArg<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep>(o1 -> io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
 
   /**
    * Adds a <code>TaskRepository</code> with default configuration to this Bootstrap.
    * @return a reference to this
    */
-  public Bootstrap withRepository() {
+  public io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.Bootstrap withRepository() { 
     delegate.withRepository();
     return this;
   }
@@ -85,7 +83,7 @@ public class Bootstrap {
    * @param repository the repository
    * @return a reference to this
    */
-  public Bootstrap withRepository(TaskRepository repository) {
+  public io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.Bootstrap withRepository(io.github.jklingsporn.coronamq.core.rxjava3.TaskRepository repository) { 
     delegate.withRepository(repository.getDelegate());
     return this;
   }
@@ -94,7 +92,7 @@ public class Bootstrap {
    * Adds a <code>Broker</code> with default configuration to this Bootstrap.
    * @return a reference to this
    */
-  public Bootstrap withBroker() {
+  public io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.Bootstrap withBroker() { 
     delegate.withBroker();
     return this;
   }
@@ -104,7 +102,7 @@ public class Bootstrap {
    * @param broker 
    * @return a reference to this
    */
-  public Bootstrap withBroker(Broker broker) {
+  public io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.Bootstrap withBroker(io.github.jklingsporn.coronamq.core.rxjava3.Broker broker) { 
     delegate.withBroker(broker.getDelegate());
     return this;
   }
@@ -114,7 +112,7 @@ public class Bootstrap {
    * @param worker a worker
    * @return 
    */
-  public Bootstrap withWorker(Worker worker) {
+  public io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.Bootstrap withWorker(io.github.jklingsporn.coronamq.core.rxjava3.Worker worker) { 
     delegate.withWorker(worker.getDelegate());
     return this;
   }
@@ -123,8 +121,8 @@ public class Bootstrap {
    * Registers and starts all services in the right order.
    * @return 
    */
-  public io.reactivex.rxjava3.core.Single<BootstrapSpreadStep> spread() {
-    io.reactivex.rxjava3.core.Single<BootstrapSpreadStep> ret = rxSpread();
+  public io.reactivex.rxjava3.core.Single<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep> spread() { 
+    io.reactivex.rxjava3.core.Single<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep> ret = rxSpread();
     ret = ret.cache();
     ret.subscribe(io.vertx.rxjava3.SingleHelper.nullObserver());
     return ret;
@@ -134,8 +132,8 @@ public class Bootstrap {
    * Registers and starts all services in the right order.
    * @return 
    */
-  public io.reactivex.rxjava3.core.Single<BootstrapSpreadStep> rxSpread() {
-    return AsyncResultSingle.toSingle(delegate.spread(), __value -> BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)__value));
+  public io.reactivex.rxjava3.core.Single<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep> rxSpread() { 
+    return AsyncResultSingle.toSingle(delegate.spread(), __value -> io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)__value));
   }
 
   public static Bootstrap newInstance(io.github.jklingsporn.coronamq.core.bootstrap.Bootstrap arg) {

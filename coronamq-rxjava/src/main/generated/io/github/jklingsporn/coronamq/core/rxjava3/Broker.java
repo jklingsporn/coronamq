@@ -16,14 +16,15 @@
 
 package io.github.jklingsporn.coronamq.core.rxjava3;
 
-import io.vertx.rxjava3.impl.AsyncResultCompletable;
 import io.vertx.lang.rx.RxGen;
 import io.vertx.lang.rx.TypeArg;
+import io.vertx.rxjava3.impl.AsyncResultCompletable;
 
 /**
  * A wrapper around a {@link io.vertx.rxjava3.pgclient.pubsub.PgSubscriber} - instance that listens to changes in the tasks table via NOTIFY/LISTEN.
  * There should be only one broker per application.
  *
+ * <p/>
  * NOTE: This class has been automatically generated from the {@link io.github.jklingsporn.coronamq.core.Broker original} non RX-ified interface using Vert.x codegen.
  */
 

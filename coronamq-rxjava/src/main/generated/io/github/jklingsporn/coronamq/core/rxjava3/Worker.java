@@ -16,14 +16,33 @@
 
 package io.github.jklingsporn.coronamq.core.rxjava3;
 
+import io.vertx.rxjava3.RxHelper;
+import io.vertx.rxjava3.ObservableHelper;
+import io.vertx.rxjava3.FlowableHelper;
+import io.vertx.rxjava3.impl.AsyncResultMaybe;
+import io.vertx.rxjava3.impl.AsyncResultSingle;
 import io.vertx.rxjava3.impl.AsyncResultCompletable;
+import io.vertx.rxjava3.WriteStreamObserver;
+import io.vertx.rxjava3.WriteStreamSubscriber;
+import java.util.Map;
+import java.util.Set;
+import java.util.List;
+import java.util.Iterator;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import io.vertx.core.Handler;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.JsonArray;
 import io.vertx.lang.rx.RxGen;
 import io.vertx.lang.rx.TypeArg;
+import io.vertx.lang.rx.MappingIterator;
 
 /**
  * A worker to work on tasks from the task queue. A worker is bound to a 'label' which describes the unit of work of this
  * worker.
  *
+ * <p/>
  * NOTE: This class has been automatically generated from the {@link io.github.jklingsporn.coronamq.core.Worker original} non RX-ified interface using Vert.x codegen.
  */
 

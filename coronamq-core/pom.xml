@@ -118,7 +118,7 @@
                                         <!-- Don't want to generated proxies, only mutiny -->
                                         <codegen.generators>mutiny</codegen.generators>
                                     </optionMap>
-                                    <outputDirectory>${parent.dir}/mutiny/src/main/generated</outputDirectory>
+                                    <outputDirectory>${parent.dir}/coronamq-mutiny/src/main/generated</outputDirectory>
                                 </configuration>
                             </execution>
                         </executions>
@@ -162,7 +162,7 @@
 <!--                                         Don't want to generated proxies, only rxjava -->
                                         <codegen.generators>RxJava3</codegen.generators>
                                     </optionMap>
-                                    <outputDirectory>${parent.dir}/rxjava/src/main/generated</outputDirectory>
+                                    <outputDirectory>${parent.dir}/coronamq-rxjava/src/main/generated</outputDirectory>
                                 </configuration>
                             </execution>
                         </executions>

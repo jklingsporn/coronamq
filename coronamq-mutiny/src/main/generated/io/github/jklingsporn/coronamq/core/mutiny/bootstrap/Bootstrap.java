@@ -1,16 +1,22 @@
 package io.github.jklingsporn.coronamq.core.mutiny.bootstrap;
 
-import io.github.jklingsporn.coronamq.core.mutiny.Broker;
-import io.github.jklingsporn.coronamq.core.mutiny.TaskRepository;
-import io.github.jklingsporn.coronamq.core.mutiny.Worker;
+import java.util.Map;
+import java.util.stream.Collectors;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import java.util.function.Consumer;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Publisher;
 import io.smallrye.mutiny.vertx.TypeArg;
 import io.vertx.codegen.annotations.Fluent;
 import io.smallrye.common.annotation.CheckReturnValue;
+import io.vertx.core.Future;
 
 /**
- * It is advisable to start the Broker, Workers and repositorys in the correct order. Single node setups required at least
+ * It is advisable to start the Broker, Workers and repositories in the correct order. Single node setups required at least
  * a repository and a broker while workers can be added before or after the queue has been "spread" (started).
  *
+ * <p/>
  * NOTE: This class has been automatically generated from the {@link io.github.jklingsporn.coronamq.core.bootstrap.Bootstrap original} non Mutiny-ified interface using Vert.x codegen.
  */
 
@@ -42,7 +48,7 @@ public class Bootstrap {
     return delegate;
   }
 
-  static final io.smallrye.mutiny.vertx.TypeArg<BootstrapSpreadStep> TYPE_ARG_0 = new TypeArg<BootstrapSpreadStep>(o1 -> BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
+  static final io.smallrye.mutiny.vertx.TypeArg<io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep> TYPE_ARG_0 = new TypeArg<io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep>(o1 -> io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
   @Override
   public String toString() {
     return delegate.toString();
@@ -65,7 +71,7 @@ public class Bootstrap {
    * @return a reference to this
    */
   @Fluent
-  public Bootstrap withRepository() {
+  public io.github.jklingsporn.coronamq.core.mutiny.bootstrap.Bootstrap withRepository() { 
     delegate.withRepository();
     return this;
   }
@@ -75,7 +81,7 @@ public class Bootstrap {
    * @return a reference to this
    */
   @Fluent
-  public Bootstrap withRepository(TaskRepository repository) {
+  public io.github.jklingsporn.coronamq.core.mutiny.bootstrap.Bootstrap withRepository(io.github.jklingsporn.coronamq.core.mutiny.TaskRepository repository) { 
     delegate.withRepository(repository.getDelegate());
     return this;
   }
@@ -84,7 +90,7 @@ public class Bootstrap {
    * @return a reference to this
    */
   @Fluent
-  public Bootstrap withBroker() {
+  public io.github.jklingsporn.coronamq.core.mutiny.bootstrap.Bootstrap withBroker() { 
     delegate.withBroker();
     return this;
   }
@@ -94,7 +100,7 @@ public class Bootstrap {
    * @return a reference to this
    */
   @Fluent
-  public Bootstrap withBroker(Broker broker) {
+  public io.github.jklingsporn.coronamq.core.mutiny.bootstrap.Bootstrap withBroker(io.github.jklingsporn.coronamq.core.mutiny.Broker broker) { 
     delegate.withBroker(broker.getDelegate());
     return this;
   }
@@ -104,7 +110,7 @@ public class Bootstrap {
    * @return 
    */
   @Fluent
-  public Bootstrap withWorker(Worker worker) {
+  public io.github.jklingsporn.coronamq.core.mutiny.bootstrap.Bootstrap withWorker(io.github.jklingsporn.coronamq.core.mutiny.Worker worker) { 
     delegate.withWorker(worker.getDelegate());
     return this;
   }
@@ -117,26 +123,26 @@ public class Bootstrap {
    * @return the {@link io.smallrye.mutiny.Uni uni} firing the result of the operation when completed, or a failure if the operation failed.
    */
   @CheckReturnValue
-  public io.smallrye.mutiny.Uni<BootstrapSpreadStep> spread() {
+  public io.smallrye.mutiny.Uni<io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep> spread() { 
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.spread().map(x -> BootstrapSpreadStep.newInstance(x)));}
 
   /**
-   * Blocking variant of {@link Bootstrap#spread}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.Bootstrap#spread}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
    * @return the BootstrapSpreadStep instance produced by the operation.
    */
-  public BootstrapSpreadStep spreadAndAwait() {
+  public io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep spreadAndAwait() { 
     return spread().await().indefinitely();
   }
 
 
   /**
-   * Variant of {@link Bootstrap#spread} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.Bootstrap#spread} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link Bootstrap#spread}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link Bootstrap#spread} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.Bootstrap#spread}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.Bootstrap#spread} but you don't need to compose it with other operations.
    */
   public void spreadAndForget() { 
     spread().subscribe().with(io.smallrye.mutiny.vertx.UniHelper.NOOP);

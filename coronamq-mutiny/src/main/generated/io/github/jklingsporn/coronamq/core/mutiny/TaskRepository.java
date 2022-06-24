@@ -1,12 +1,23 @@
 package io.github.jklingsporn.coronamq.core.mutiny;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import java.util.function.Consumer;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Publisher;
+import io.smallrye.mutiny.vertx.TypeArg;
+import io.vertx.codegen.annotations.Fluent;
 import io.smallrye.common.annotation.CheckReturnValue;
-import io.vertx.core.json.JsonObject;
 import io.github.jklingsporn.coronamq.core.TaskStatus;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.Future;
 
 /**
  * Necessary actions to operate with the task queue.
  *
+ * <p/>
  * NOTE: This class has been automatically generated from the {@link io.github.jklingsporn.coronamq.core.TaskRepository original} non Mutiny-ified interface using Vert.x codegen.
  */
 
@@ -56,8 +67,8 @@ public class TaskRepository {
     return delegate.hashCode();
   }
 
-  public static TaskRepository createProxy(io.vertx.mutiny.core.Vertx vertx, String address) {
-    TaskRepository ret = TaskRepository.newInstance((io.github.jklingsporn.coronamq.core.TaskRepository) io.github.jklingsporn.coronamq.core.TaskRepository.createProxy(vertx.getDelegate(), address));
+  public static io.github.jklingsporn.coronamq.core.mutiny.TaskRepository createProxy(io.vertx.mutiny.core.Vertx vertx, String address) { 
+    io.github.jklingsporn.coronamq.core.mutiny.TaskRepository ret = io.github.jklingsporn.coronamq.core.mutiny.TaskRepository.newInstance((io.github.jklingsporn.coronamq.core.TaskRepository)io.github.jklingsporn.coronamq.core.TaskRepository.createProxy(vertx.getDelegate(), address));
     return ret;
   }
 
@@ -75,7 +86,7 @@ public class TaskRepository {
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.createTask(label, payload));}
 
   /**
-   * Blocking variant of {@link TaskRepository#createTask(String,JsonObject)}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#createTask(String,JsonObject)}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
@@ -89,10 +100,10 @@ public class TaskRepository {
 
 
   /**
-   * Variant of {@link TaskRepository#createTask(String,JsonObject)} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#createTask(String,JsonObject)} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link TaskRepository#createTask(String,JsonObject)}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link TaskRepository#createTask(String,JsonObject)} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#createTask(String,JsonObject)}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#createTask(String,JsonObject)} but you don't need to compose it with other operations.
    * @param label the label
    * @param payload the payload
    */
@@ -115,7 +126,7 @@ public class TaskRepository {
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.failTask(id, reason));}
 
   /**
-   * Blocking variant of {@link TaskRepository#failTask(String,String)}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#failTask(String,String)}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
@@ -129,10 +140,10 @@ public class TaskRepository {
 
 
   /**
-   * Variant of {@link TaskRepository#failTask(String,String)} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#failTask(String,String)} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link TaskRepository#failTask(String,String)}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link TaskRepository#failTask(String,String)} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#failTask(String,String)}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#failTask(String,String)} but you don't need to compose it with other operations.
    * @param id the unique id of the task
    * @param reason the reason why the task failed
    */
@@ -152,11 +163,11 @@ public class TaskRepository {
    * @return the {@link io.smallrye.mutiny.Uni uni} firing the result of the operation when completed, or a failure if the operation failed.
    */
   @CheckReturnValue
-  public io.smallrye.mutiny.Uni<Void> updateTask(String id, TaskStatus newStatus, TaskStatus oldStatus) {
+  public io.smallrye.mutiny.Uni<Void> updateTask(String id, io.github.jklingsporn.coronamq.core.TaskStatus newStatus, io.github.jklingsporn.coronamq.core.TaskStatus oldStatus) { 
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.updateTask(id, newStatus, oldStatus));}
 
   /**
-   * Blocking variant of {@link TaskRepository#updateTask(String,TaskStatus,TaskStatus)}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#updateTask(String,TaskStatus,TaskStatus)}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
@@ -165,21 +176,21 @@ public class TaskRepository {
    * @param oldStatus the expected old status
    * @return the Void instance produced by the operation.
    */
-  public Void updateTaskAndAwait(String id, TaskStatus newStatus, TaskStatus oldStatus) {
+  public Void updateTaskAndAwait(String id, io.github.jklingsporn.coronamq.core.TaskStatus newStatus, io.github.jklingsporn.coronamq.core.TaskStatus oldStatus) { 
     return updateTask(id, newStatus, oldStatus).await().indefinitely();
   }
 
 
   /**
-   * Variant of {@link TaskRepository#updateTask(String,TaskStatus,TaskStatus)} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#updateTask(String,TaskStatus,TaskStatus)} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link TaskRepository#updateTask(String,TaskStatus,TaskStatus)}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link TaskRepository#updateTask(String,TaskStatus,TaskStatus)} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#updateTask(String,TaskStatus,TaskStatus)}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#updateTask(String,TaskStatus,TaskStatus)} but you don't need to compose it with other operations.
    * @param id the unique id of the task
    * @param newStatus the new status of the task
    * @param oldStatus the expected old status
    */
-  public void updateTaskAndForget(String id, TaskStatus newStatus, TaskStatus oldStatus) {
+  public void updateTaskAndForget(String id, io.github.jklingsporn.coronamq.core.TaskStatus newStatus, io.github.jklingsporn.coronamq.core.TaskStatus oldStatus) { 
     updateTask(id, newStatus, oldStatus).subscribe().with(io.smallrye.mutiny.vertx.UniHelper.NOOP);
   }
 
@@ -197,7 +208,7 @@ public class TaskRepository {
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.requestTask(label));}
 
   /**
-   * Blocking variant of {@link TaskRepository#requestTask(String)}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#requestTask(String)}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
@@ -210,10 +221,10 @@ public class TaskRepository {
 
 
   /**
-   * Variant of {@link TaskRepository#requestTask(String)} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#requestTask(String)} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link TaskRepository#requestTask(String)}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link TaskRepository#requestTask(String)} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#requestTask(String)}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#requestTask(String)} but you don't need to compose it with other operations.
    * @param label the label
    */
   public void requestTaskAndForget(String label) { 
@@ -233,7 +244,7 @@ public class TaskRepository {
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.getTask(id));}
 
   /**
-   * Blocking variant of {@link TaskRepository#getTask(String)}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#getTask(String)}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
@@ -246,10 +257,10 @@ public class TaskRepository {
 
 
   /**
-   * Variant of {@link TaskRepository#getTask(String)} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#getTask(String)} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link TaskRepository#getTask(String)}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link TaskRepository#getTask(String)} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#getTask(String)}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#getTask(String)} but you don't need to compose it with other operations.
    * @param id the id.
    */
   public void getTaskAndForget(String id) { 
@@ -269,7 +280,7 @@ public class TaskRepository {
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.countTasks(label));}
 
   /**
-   * Blocking variant of {@link TaskRepository#countTasks(String)}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#countTasks(String)}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
@@ -282,10 +293,10 @@ public class TaskRepository {
 
 
   /**
-   * Variant of {@link TaskRepository#countTasks(String)} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#countTasks(String)} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link TaskRepository#countTasks(String)}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link TaskRepository#countTasks(String)} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#countTasks(String)}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#countTasks(String)} but you don't need to compose it with other operations.
    * @param label the label
    */
   public void countTasksAndForget(String label) { 
@@ -305,7 +316,7 @@ public class TaskRepository {
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.deleteTask(id));}
 
   /**
-   * Blocking variant of {@link TaskRepository#deleteTask(String)}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#deleteTask(String)}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
@@ -318,10 +329,10 @@ public class TaskRepository {
 
 
   /**
-   * Variant of {@link TaskRepository#deleteTask(String)} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#deleteTask(String)} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link TaskRepository#deleteTask(String)}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link TaskRepository#deleteTask(String)} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#deleteTask(String)}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#deleteTask(String)} but you don't need to compose it with other operations.
    * @param id the id.
    */
   public void deleteTaskAndForget(String id) { 
@@ -341,7 +352,7 @@ public class TaskRepository {
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.start());}
 
   /**
-   * Blocking variant of {@link TaskRepository#start}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#start}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
@@ -353,10 +364,10 @@ public class TaskRepository {
 
 
   /**
-   * Variant of {@link TaskRepository#start} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#start} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link TaskRepository#start}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link TaskRepository#start} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#start}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#start} but you don't need to compose it with other operations.
    */
   public void startAndForget() { 
     start().subscribe().with(io.smallrye.mutiny.vertx.UniHelper.NOOP);
@@ -375,7 +386,7 @@ public class TaskRepository {
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.stop());}
 
   /**
-   * Blocking variant of {@link TaskRepository#stop}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#stop}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
@@ -387,10 +398,10 @@ public class TaskRepository {
 
 
   /**
-   * Variant of {@link TaskRepository#stop} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#stop} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link TaskRepository#stop}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link TaskRepository#stop} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#stop}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.TaskRepository#stop} but you don't need to compose it with other operations.
    */
   public void stopAndForget() { 
     stop().subscribe().with(io.smallrye.mutiny.vertx.UniHelper.NOOP);

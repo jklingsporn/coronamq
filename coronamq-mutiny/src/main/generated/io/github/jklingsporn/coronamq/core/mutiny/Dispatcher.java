@@ -1,11 +1,22 @@
 package io.github.jklingsporn.coronamq.core.mutiny;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import java.util.function.Consumer;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Publisher;
+import io.smallrye.mutiny.vertx.TypeArg;
+import io.vertx.codegen.annotations.Fluent;
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.Future;
 
 /**
  * Any instance that can dispatch tasks to the queue.
  *
+ * <p/>
  * NOTE: This class has been automatically generated from the {@link io.github.jklingsporn.coronamq.core.Dispatcher original} non Mutiny-ified interface using Vert.x codegen.
  */
 
@@ -69,7 +80,7 @@ public class Dispatcher {
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.dispatch(label, payload));}
 
   /**
-   * Blocking variant of {@link Dispatcher#dispatch(String,JsonObject)}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.Dispatcher#dispatch(String,JsonObject)}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
@@ -83,10 +94,10 @@ public class Dispatcher {
 
 
   /**
-   * Variant of {@link Dispatcher#dispatch(String,JsonObject)} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.Dispatcher#dispatch(String,JsonObject)} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link Dispatcher#dispatch(String,JsonObject)}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link Dispatcher#dispatch(String,JsonObject)} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.Dispatcher#dispatch(String,JsonObject)}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.Dispatcher#dispatch(String,JsonObject)} but you don't need to compose it with other operations.
    * @param label the label
    * @param payload the payload
    */

@@ -1,12 +1,18 @@
 package io.github.jklingsporn.coronamq.core.mutiny.bootstrap;
 
-import io.github.jklingsporn.coronamq.core.mutiny.Broker;
-import io.github.jklingsporn.coronamq.core.mutiny.TaskRepository;
-import io.github.jklingsporn.coronamq.core.mutiny.Worker;
+import java.util.Map;
+import java.util.stream.Collectors;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import java.util.function.Consumer;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Publisher;
 import io.smallrye.mutiny.vertx.TypeArg;
+import io.vertx.codegen.annotations.Fluent;
 import io.smallrye.common.annotation.CheckReturnValue;
 import java.util.List;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.Future;
 
 @io.smallrye.mutiny.vertx.MutinyGen(io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep.class)
 public class BootstrapSpreadStep {
@@ -36,9 +42,9 @@ public class BootstrapSpreadStep {
     return delegate;
   }
 
-  static final io.smallrye.mutiny.vertx.TypeArg<Worker> TYPE_ARG_2 = new TypeArg<Worker>(o1 -> Worker.newInstance((io.github.jklingsporn.coronamq.core.Worker)o1), o1 -> o1.getDelegate());
-  static final io.smallrye.mutiny.vertx.TypeArg<BootstrapSpreadStep> TYPE_ARG_1 = new TypeArg<BootstrapSpreadStep>(o1 -> BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
-  static final io.smallrye.mutiny.vertx.TypeArg<BootstrapSpreadStep> TYPE_ARG_0 = new TypeArg<BootstrapSpreadStep>(o1 -> BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
+  static final io.smallrye.mutiny.vertx.TypeArg<io.github.jklingsporn.coronamq.core.mutiny.Worker> TYPE_ARG_2 = new TypeArg<io.github.jklingsporn.coronamq.core.mutiny.Worker>(o1 -> io.github.jklingsporn.coronamq.core.mutiny.Worker.newInstance((io.github.jklingsporn.coronamq.core.Worker)o1), o1 -> o1.getDelegate());
+  static final io.smallrye.mutiny.vertx.TypeArg<io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep> TYPE_ARG_1 = new TypeArg<io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep>(o1 -> io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
+  static final io.smallrye.mutiny.vertx.TypeArg<io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep> TYPE_ARG_0 = new TypeArg<io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep>(o1 -> io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
   @Override
   public String toString() {
     return delegate.toString();
@@ -66,30 +72,30 @@ public class BootstrapSpreadStep {
    * @return the {@link io.smallrye.mutiny.Uni uni} firing the result of the operation when completed, or a failure if the operation failed.
    */
   @CheckReturnValue
-  public io.smallrye.mutiny.Uni<BootstrapSpreadStep> addWorker(Worker worker) {
+  public io.smallrye.mutiny.Uni<io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep> addWorker(io.github.jklingsporn.coronamq.core.mutiny.Worker worker) { 
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.addWorker(worker.getDelegate()).map(x -> BootstrapSpreadStep.newInstance(x)));}
 
   /**
-   * Blocking variant of {@link BootstrapSpreadStep#addWorker(Worker)}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#addWorker(io.github.jklingsporn.coronamq.core.mutiny.Worker)}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
    * @param worker a worker
    * @return the BootstrapSpreadStep instance produced by the operation.
    */
-  public BootstrapSpreadStep addWorkerAndAwait(Worker worker) {
+  public io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep addWorkerAndAwait(io.github.jklingsporn.coronamq.core.mutiny.Worker worker) { 
     return addWorker(worker).await().indefinitely();
   }
 
 
   /**
-   * Variant of {@link BootstrapSpreadStep#addWorker(Worker)} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#addWorker(io.github.jklingsporn.coronamq.core.mutiny.Worker)} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link BootstrapSpreadStep#addWorker(Worker)}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link BootstrapSpreadStep#addWorker(Worker)} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#addWorker(io.github.jklingsporn.coronamq.core.mutiny.Worker)}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#addWorker(io.github.jklingsporn.coronamq.core.mutiny.Worker)} but you don't need to compose it with other operations.
    * @param worker a worker
    */
-  public void addWorkerAndForget(Worker worker) {
+  public void addWorkerAndForget(io.github.jklingsporn.coronamq.core.mutiny.Worker worker) { 
     addWorker(worker).subscribe().with(io.smallrye.mutiny.vertx.UniHelper.NOOP);
   }
 
@@ -103,30 +109,30 @@ public class BootstrapSpreadStep {
    * @return the {@link io.smallrye.mutiny.Uni uni} firing the result of the operation when completed, or a failure if the operation failed.
    */
   @CheckReturnValue
-  public io.smallrye.mutiny.Uni<BootstrapSpreadStep> removeWorker(Worker worker) {
+  public io.smallrye.mutiny.Uni<io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep> removeWorker(io.github.jklingsporn.coronamq.core.mutiny.Worker worker) { 
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.removeWorker(worker.getDelegate()).map(x -> BootstrapSpreadStep.newInstance(x)));}
 
   /**
-   * Blocking variant of {@link BootstrapSpreadStep#removeWorker(Worker)}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#removeWorker(io.github.jklingsporn.coronamq.core.mutiny.Worker)}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
    * @param worker a worker
    * @return the BootstrapSpreadStep instance produced by the operation.
    */
-  public BootstrapSpreadStep removeWorkerAndAwait(Worker worker) {
+  public io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep removeWorkerAndAwait(io.github.jklingsporn.coronamq.core.mutiny.Worker worker) { 
     return removeWorker(worker).await().indefinitely();
   }
 
 
   /**
-   * Variant of {@link BootstrapSpreadStep#removeWorker(Worker)} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#removeWorker(io.github.jklingsporn.coronamq.core.mutiny.Worker)} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link BootstrapSpreadStep#removeWorker(Worker)}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link BootstrapSpreadStep#removeWorker(Worker)} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#removeWorker(io.github.jklingsporn.coronamq.core.mutiny.Worker)}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#removeWorker(io.github.jklingsporn.coronamq.core.mutiny.Worker)} but you don't need to compose it with other operations.
    * @param worker a worker
    */
-  public void removeWorkerAndForget(Worker worker) {
+  public void removeWorkerAndForget(io.github.jklingsporn.coronamq.core.mutiny.Worker worker) { 
     removeWorker(worker).subscribe().with(io.smallrye.mutiny.vertx.UniHelper.NOOP);
   }
 
@@ -145,7 +151,7 @@ public class BootstrapSpreadStep {
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.dispatch(label, payload));}
 
   /**
-   * Blocking variant of {@link BootstrapSpreadStep#dispatch(String,JsonObject)}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#dispatch(String,JsonObject)}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
@@ -159,10 +165,10 @@ public class BootstrapSpreadStep {
 
 
   /**
-   * Variant of {@link BootstrapSpreadStep#dispatch(String,JsonObject)} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#dispatch(String,JsonObject)} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link BootstrapSpreadStep#dispatch(String,JsonObject)}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link BootstrapSpreadStep#dispatch(String,JsonObject)} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#dispatch(String,JsonObject)}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#dispatch(String,JsonObject)} but you don't need to compose it with other operations.
    * @param label the task's label
    * @param payload the task's payload
    */
@@ -183,7 +189,7 @@ public class BootstrapSpreadStep {
     return io.smallrye.mutiny.vertx.UniHelper.toUni(delegate.vaccinate());}
 
   /**
-   * Blocking variant of {@link BootstrapSpreadStep#vaccinate}.
+   * Blocking variant of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#vaccinate}.
    * <p>
    * This method waits for the completion of the underlying asynchronous operation.
    * If the operation completes successfully, the result is returned, otherwise the failure is thrown (potentially wrapped in a RuntimeException).
@@ -195,10 +201,10 @@ public class BootstrapSpreadStep {
 
 
   /**
-   * Variant of {@link BootstrapSpreadStep#vaccinate} that ignores the result of the operation.
+   * Variant of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#vaccinate} that ignores the result of the operation.
    * <p>
-   * This method subscribes on the result of {@link BootstrapSpreadStep#vaccinate}, but discards the outcome (item or failure).
-   * This method is useful to trigger the asynchronous operation from {@link BootstrapSpreadStep#vaccinate} but you don't need to compose it with other operations.
+   * This method subscribes on the result of {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#vaccinate}, but discards the outcome (item or failure).
+   * This method is useful to trigger the asynchronous operation from {@link io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep#vaccinate} but you don't need to compose it with other operations.
    */
   public void vaccinateAndForget() { 
     vaccinate().subscribe().with(io.smallrye.mutiny.vertx.UniHelper.NOOP);
@@ -208,24 +214,24 @@ public class BootstrapSpreadStep {
   /**
    * @return the broker or null.
    */
-  public Broker getBroker() {
-    Broker ret = Broker.newInstance((io.github.jklingsporn.coronamq.core.Broker)delegate.getBroker());
+  public io.github.jklingsporn.coronamq.core.mutiny.Broker getBroker() { 
+    io.github.jklingsporn.coronamq.core.mutiny.Broker ret = io.github.jklingsporn.coronamq.core.mutiny.Broker.newInstance((io.github.jklingsporn.coronamq.core.Broker)delegate.getBroker());
     return ret;
   }
 
   /**
    * @return the repository or null
    */
-  public TaskRepository getRepository() {
-    TaskRepository ret = TaskRepository.newInstance((io.github.jklingsporn.coronamq.core.TaskRepository)delegate.getRepository());
+  public io.github.jklingsporn.coronamq.core.mutiny.TaskRepository getRepository() { 
+    io.github.jklingsporn.coronamq.core.mutiny.TaskRepository ret = io.github.jklingsporn.coronamq.core.mutiny.TaskRepository.newInstance((io.github.jklingsporn.coronamq.core.TaskRepository)delegate.getRepository());
     return ret;
   }
 
   /**
    * @return all current workers, never null.
    */
-  public List<Worker> getWorkers() {
-    List<Worker> ret = delegate.getWorkers().stream().map(elt -> Worker.newInstance((io.github.jklingsporn.coronamq.core.Worker)elt)).collect(java.util.stream.Collectors.toList());
+  public List<io.github.jklingsporn.coronamq.core.mutiny.Worker> getWorkers() { 
+    List<io.github.jklingsporn.coronamq.core.mutiny.Worker> ret = delegate.getWorkers().stream().map(elt -> io.github.jklingsporn.coronamq.core.mutiny.Worker.newInstance((io.github.jklingsporn.coronamq.core.Worker)elt)).collect(java.util.stream.Collectors.toList());
     return ret;
   }
 

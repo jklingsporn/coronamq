@@ -2,6 +2,7 @@ package io.github.jklingsporn.coronamq.core.impl;
 
 import io.github.jklingsporn.coronamq.core.*;
 import io.github.jklingsporn.coronamq.core.bootstrap.Bootstrap;
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -42,7 +43,6 @@ import java.util.function.Function;
  */
 public class CoronaMq {
 
-    private CoronaMq(){}
 
     private static final CoronaMqOptions DEFAULT_OPTIONS = new CoronaMqOptions();
 
@@ -144,6 +144,7 @@ public class CoronaMq {
      * @param work the work that has to be done
      * @return a new {@link Worker} instance with default options. A worker to work on tasks from the task queue.
      */
+    @GenIgnore
     public static Worker worker(Vertx vertx,
                                 String label,
                                 Function<JsonObject, Future<Void>> work){
@@ -157,6 +158,7 @@ public class CoronaMq {
      * @param work the work that has to be done
      * @return a new {@link Worker} instance. A worker to work on tasks from the task queue.
      */
+    @GenIgnore
     public static Worker worker(Vertx vertx,
                                 CoronaMqOptions coronaMqOptions,
                                 String label,

@@ -16,16 +16,12 @@
 
 package io.github.jklingsporn.coronamq.core.rxjava3.bootstrap;
 
-import io.github.jklingsporn.coronamq.core.rxjava3.Broker;
-import io.github.jklingsporn.coronamq.core.rxjava3.TaskRepository;
-import io.github.jklingsporn.coronamq.core.rxjava3.Worker;
-import io.vertx.rxjava3.impl.AsyncResultSingle;
-import io.vertx.rxjava3.impl.AsyncResultCompletable;
-
-import java.util.stream.Collectors;
-
 import io.vertx.lang.rx.RxGen;
 import io.vertx.lang.rx.TypeArg;
+import io.vertx.rxjava3.impl.AsyncResultCompletable;
+import io.vertx.rxjava3.impl.AsyncResultSingle;
+
+import java.util.stream.Collectors;
 
 
 @RxGen(io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep.class)
@@ -67,17 +63,17 @@ public class BootstrapSpreadStep {
     return delegate;
   }
 
-  private static final TypeArg<BootstrapSpreadStep> TYPE_ARG_0 = new TypeArg<BootstrapSpreadStep>(o1 -> BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
-  private static final TypeArg<BootstrapSpreadStep> TYPE_ARG_1 = new TypeArg<BootstrapSpreadStep>(o1 -> BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
-  private static final TypeArg<Worker> TYPE_ARG_2 = new TypeArg<Worker>(o1 -> Worker.newInstance((io.github.jklingsporn.coronamq.core.Worker)o1), o1 -> o1.getDelegate());
+  private static final TypeArg<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep> TYPE_ARG_0 = new TypeArg<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep>(o1 -> io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
+  private static final TypeArg<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep> TYPE_ARG_1 = new TypeArg<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep>(o1 -> io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
+  private static final TypeArg<io.github.jklingsporn.coronamq.core.rxjava3.Worker> TYPE_ARG_2 = new TypeArg<io.github.jklingsporn.coronamq.core.rxjava3.Worker>(o1 -> io.github.jklingsporn.coronamq.core.rxjava3.Worker.newInstance((io.github.jklingsporn.coronamq.core.Worker)o1), o1 -> o1.getDelegate());
 
   /**
    * Adds and deploys a Worker to this boostrap.
    * @param worker a worker
    * @return the <code>Future</code> that completes when the worker is registered to the EventBus.
    */
-  public io.reactivex.rxjava3.core.Single<BootstrapSpreadStep> addWorker(Worker worker) {
-    io.reactivex.rxjava3.core.Single<BootstrapSpreadStep> ret = rxAddWorker(worker);
+  public io.reactivex.rxjava3.core.Single<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep> addWorker(io.github.jklingsporn.coronamq.core.rxjava3.Worker worker) { 
+    io.reactivex.rxjava3.core.Single<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep> ret = rxAddWorker(worker);
     ret = ret.cache();
     ret.subscribe(io.vertx.rxjava3.SingleHelper.nullObserver());
     return ret;
@@ -88,8 +84,8 @@ public class BootstrapSpreadStep {
    * @param worker a worker
    * @return the <code>Future</code> that completes when the worker is registered to the EventBus.
    */
-  public io.reactivex.rxjava3.core.Single<BootstrapSpreadStep> rxAddWorker(Worker worker) {
-    return AsyncResultSingle.toSingle(delegate.addWorker(worker.getDelegate()), __value -> BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)__value));
+  public io.reactivex.rxjava3.core.Single<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep> rxAddWorker(io.github.jklingsporn.coronamq.core.rxjava3.Worker worker) { 
+    return AsyncResultSingle.toSingle(delegate.addWorker(worker.getDelegate()), __value -> io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)__value));
   }
 
   /**
@@ -97,8 +93,8 @@ public class BootstrapSpreadStep {
    * @param worker a worker
    * @return the <code>Future</code> that completes when the worker is unregistered from the EventBus.
    */
-  public io.reactivex.rxjava3.core.Single<BootstrapSpreadStep> removeWorker(Worker worker) {
-    io.reactivex.rxjava3.core.Single<BootstrapSpreadStep> ret = rxRemoveWorker(worker);
+  public io.reactivex.rxjava3.core.Single<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep> removeWorker(io.github.jklingsporn.coronamq.core.rxjava3.Worker worker) { 
+    io.reactivex.rxjava3.core.Single<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep> ret = rxRemoveWorker(worker);
     ret = ret.cache();
     ret.subscribe(io.vertx.rxjava3.SingleHelper.nullObserver());
     return ret;
@@ -109,8 +105,8 @@ public class BootstrapSpreadStep {
    * @param worker a worker
    * @return the <code>Future</code> that completes when the worker is unregistered from the EventBus.
    */
-  public io.reactivex.rxjava3.core.Single<BootstrapSpreadStep> rxRemoveWorker(Worker worker) {
-    return AsyncResultSingle.toSingle(delegate.removeWorker(worker.getDelegate()), __value -> BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)__value));
+  public io.reactivex.rxjava3.core.Single<io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep> rxRemoveWorker(io.github.jklingsporn.coronamq.core.rxjava3.Worker worker) { 
+    return AsyncResultSingle.toSingle(delegate.removeWorker(worker.getDelegate()), __value -> io.github.jklingsporn.coronamq.core.rxjava3.bootstrap.BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)__value));
   }
 
   /**
@@ -158,24 +154,24 @@ public class BootstrapSpreadStep {
   /**
    * @return the broker or null.
    */
-  public Broker getBroker() {
-    Broker ret = Broker.newInstance((io.github.jklingsporn.coronamq.core.Broker)delegate.getBroker());
+  public io.github.jklingsporn.coronamq.core.rxjava3.Broker getBroker() { 
+    io.github.jklingsporn.coronamq.core.rxjava3.Broker ret = io.github.jklingsporn.coronamq.core.rxjava3.Broker.newInstance((io.github.jklingsporn.coronamq.core.Broker)delegate.getBroker());
     return ret;
   }
 
   /**
    * @return the repository or null
    */
-  public TaskRepository getRepository() {
-    TaskRepository ret = TaskRepository.newInstance((io.github.jklingsporn.coronamq.core.TaskRepository)delegate.getRepository());
+  public io.github.jklingsporn.coronamq.core.rxjava3.TaskRepository getRepository() { 
+    io.github.jklingsporn.coronamq.core.rxjava3.TaskRepository ret = io.github.jklingsporn.coronamq.core.rxjava3.TaskRepository.newInstance((io.github.jklingsporn.coronamq.core.TaskRepository)delegate.getRepository());
     return ret;
   }
 
   /**
    * @return all current workers, never null.
    */
-  public java.util.List<Worker> getWorkers() {
-    java.util.List<Worker> ret = delegate.getWorkers().stream().map(elt -> Worker.newInstance((io.github.jklingsporn.coronamq.core.Worker)elt)).collect(Collectors.toList());
+  public java.util.List<io.github.jklingsporn.coronamq.core.rxjava3.Worker> getWorkers() { 
+    java.util.List<io.github.jklingsporn.coronamq.core.rxjava3.Worker> ret = delegate.getWorkers().stream().map(elt -> io.github.jklingsporn.coronamq.core.rxjava3.Worker.newInstance((io.github.jklingsporn.coronamq.core.Worker)elt)).collect(Collectors.toList());
     return ret;
   }
 
