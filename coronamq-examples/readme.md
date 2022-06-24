@@ -1,4 +1,4 @@
- A complete example of CoronaMQ can be found in the [CompleteExample](src/main/java/io/github/jklingsporn/coronamq/examples/complete/CompleteExample.java).
+ A complete example of CoronaMQ can be found in the [CompleteExample](src/main/java/io/github/jklingsporn/coronamq/coronamq-examples/complete/CompleteExample.java).
  class. It spawns several tasks and measures how long this setup takes to handle all the tasks.
  It assumes that there is a postgres database set up with a tasks-table and the triggers. Either run the provided
  <code>Dockerfile</code> from the parent or add the SQL from <code>core/src/main/resources/00_setup.sql</code> to your existing DB.<br>

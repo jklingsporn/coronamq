@@ -9,11 +9,11 @@
     <packaging>pom</packaging>
     <version>0.2</version>
     <modules>
-        <module>core</module>
-        <module>examples</module>
-        <module>mutiny</module>
-        <module>rxjava</module>
-        <module>metrics</module>
+        <module>coronamq-core</module>
+        <module>coronamq-examples</module>
+        <module>coronamq-mutiny</module>
+        <module>coronamq-rxjava</module>
+        <module>coronamq-metrics</module>
     </modules>
 
     <properties>

@@ -9,7 +9,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>coronamq-core</artifactId>
-    <name>core</name>
     <properties>
         <parent.dir>${project.parent.basedir}</parent.dir>
     </properties>
