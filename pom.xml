@@ -17,14 +17,14 @@
     </modules>
 
     <properties>
-        <vertx.version>4.3.1</vertx.version>
+        <vertx.version>4.3.3</vertx.version>
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
         <maven-surefire-plugin.version>2.19</maven-surefire-plugin.version>
         <junit-platform-surefire-provider.version>1.0.1</junit-platform-surefire-provider.version>
         <assertj-core.version>3.23.1</assertj-core.version>
-        <testcontainers.version>1.17.2</testcontainers.version>
-        <postgresql.driver.version>42.3.3</postgresql.driver.version>
-        <logback-classic.version>1.2.10</logback-classic.version>
+        <testcontainers.version>1.17.3</testcontainers.version>
+        <postgresql.driver.version>42.4.2</postgresql.driver.version>
+        <logback-classic.version>1.2.11</logback-classic.version>
         <mutiny.version>1.5.0</mutiny.version>
         <mutiny.bingings.version>2.22.0</mutiny.bingings.version>
         <slf4j-api.version>1.7.36</slf4j-api.version>
@@ -160,8 +160,21 @@
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.3.1</version>
+                        <version>3.3.2</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -171,6 +184,7 @@
                             </execution>
                         </executions>
                         <configuration>
+                            <doclint>none</doclint>
                             <failOnWarnings>false</failOnWarnings>
                         </configuration>
                     </plugin>

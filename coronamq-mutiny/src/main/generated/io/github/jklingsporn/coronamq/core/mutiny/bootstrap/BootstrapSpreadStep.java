@@ -1,18 +1,10 @@
 package io.github.jklingsporn.coronamq.core.mutiny.bootstrap;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
-import java.util.function.Consumer;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Publisher;
-import io.smallrye.mutiny.vertx.TypeArg;
-import io.vertx.codegen.annotations.Fluent;
 import io.smallrye.common.annotation.CheckReturnValue;
-import java.util.List;
+import io.smallrye.mutiny.vertx.TypeArg;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.Future;
+
+import java.util.List;
 
 @io.smallrye.mutiny.vertx.MutinyGen(io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep.class)
 public class BootstrapSpreadStep {
@@ -42,8 +34,8 @@ public class BootstrapSpreadStep {
     return delegate;
   }
 
-  static final io.smallrye.mutiny.vertx.TypeArg<io.github.jklingsporn.coronamq.core.mutiny.Worker> TYPE_ARG_2 = new TypeArg<io.github.jklingsporn.coronamq.core.mutiny.Worker>(o1 -> io.github.jklingsporn.coronamq.core.mutiny.Worker.newInstance((io.github.jklingsporn.coronamq.core.Worker)o1), o1 -> o1.getDelegate());
   static final io.smallrye.mutiny.vertx.TypeArg<io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep> TYPE_ARG_1 = new TypeArg<io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep>(o1 -> io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
+  static final io.smallrye.mutiny.vertx.TypeArg<io.github.jklingsporn.coronamq.core.mutiny.Worker> TYPE_ARG_2 = new TypeArg<io.github.jklingsporn.coronamq.core.mutiny.Worker>(o1 -> io.github.jklingsporn.coronamq.core.mutiny.Worker.newInstance((io.github.jklingsporn.coronamq.core.Worker)o1), o1 -> o1.getDelegate());
   static final io.smallrye.mutiny.vertx.TypeArg<io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep> TYPE_ARG_0 = new TypeArg<io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep>(o1 -> io.github.jklingsporn.coronamq.core.mutiny.bootstrap.BootstrapSpreadStep.newInstance((io.github.jklingsporn.coronamq.core.bootstrap.BootstrapSpreadStep)o1), o1 -> o1.getDelegate());
   @Override
   public String toString() {

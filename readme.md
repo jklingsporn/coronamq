@@ -32,6 +32,34 @@ database errors et al. so the best you can get is `effectively once` delivery an
 
 # Usage 
 
+## Maven
+CoronaMQ supports the following API-flavors:
+
+### vertx-Future
+```
+<dependency>
+    <groupId>io.github.jklingsporn</groupId>
+    <artifactId>coronamq-core</artifactId>
+    <version>0.2</version>
+</dependency>
+```
+### Mutiny
+```
+<dependency>
+    <groupId>io.github.jklingsporn</groupId>
+    <artifactId>coronamq-mutiny</artifactId>
+    <version>0.2</version>
+</dependency>
+```
+### rxjava3
+```
+<dependency>
+    <groupId>io.github.jklingsporn</groupId>
+    <artifactId>coronamq-rxjava</artifactId>
+    <version>0.2</version>
+</dependency>
+```
+
 ## Initial setup
 - To run the examples, you need a running docker daemon.
 - For a more advanced test, you can use the provided docker file.
@@ -59,6 +87,7 @@ EXECUTE PROCEDURE task_status_notify();
 
 ## Code example
 
+The following example uses the `Future`-API
 ```
 @Test
 public void boostrapExample(Vertx vertx, VertxTestContext testContext){
