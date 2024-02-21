@@ -23,7 +23,7 @@
         <junit-platform-surefire-provider.version>1.0.1</junit-platform-surefire-provider.version>
         <assertj-core.version>3.23.1</assertj-core.version>
         <testcontainers.version>1.17.3</testcontainers.version>
-        <postgresql.driver.version>42.4.2</postgresql.driver.version>
+        <postgresql.driver.version>42.7.2</postgresql.driver.version>
         <logback-classic.version>1.2.11</logback-classic.version>
         <mutiny.version>1.5.0</mutiny.version>
         <mutiny.bingings.version>2.22.0</mutiny.bingings.version>
